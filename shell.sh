@@ -47,7 +47,9 @@ fi
 
 #Analyse des traitements
 case $traitement in
+#Affichage du message d'aide
 -h)
+    cat help.txt
     ;;
 #Traitement qui donne les 10 conducteurs avec le plus de trajets par ordre décroissant
 -d1)
