@@ -154,7 +154,7 @@ AVL* ajouterAVL(AVL* a, char ville[],int id_trajet, int *h,char type[]){
     }
     if(*h!=0){
 		a->equilibre=a->equilibre+*h;
-		a=equilibrageAVL(a);
+		a=equilibreAVL(a);
 		if(a->equilibre==0){
 			*h=0;
 		}
