@@ -119,7 +119,7 @@ AVL* ajouterAVL(AVL* a, char ville[],int id_trajet, int *h,char type[]){
         a=creerAVL(id_trajet, ville);
         return a;
     }
-    int compare=strcmp(ville, a->ville)
+    int compare=strcmp(ville, a->ville);
     if(compare=0){
         for(int i=0;a->tab[i]==NULL,i++){
             if(id_trajet==a->tab[i]){
@@ -130,7 +130,7 @@ AVL* ajouterAVL(AVL* a, char ville[],int id_trajet, int *h,char type[]){
             //Ville déjà présente donc on met à jour les informations nécessaires
             a->compteur_total++;
             if(strcmp(type,depart)){
-                a->compteur_depart++
+                a->compteur_depart++;
             }
             //Réallouer le tableau avec une taille augmentée
             int* temp = (int*)realloc(a->tab, a->trajets_depart * sizeof(int));
