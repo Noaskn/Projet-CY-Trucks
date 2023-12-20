@@ -2,124 +2,174 @@
 #include <string.h>
 #include <stdlib.h>
 
-typedef struct Ville{
-    char nom[50];
-    int trajets;
-    int conducteurs;
-    struct Ville* gauche;
-    struct Ville* droite;
-    int hauteur;
-}Ville;
+typedef struct AVL{
+    int id_trajet;
+    char ville[50];
+    int *tab;
+    int compteur_total;
+    int compteur_depart;
+    struct AVL* fg;
+    struct AVL* fd;
+    int equilibre;
+}AVL;
 
-// Fonction pour obtenir la hauteur d'un nœud
-int hauteur(Ville* n){
-    if (n == NULL){
-        return 0;
+//Fonction pour créer un nouveau nœud
+AVL* creerNoeud(int id_trajet, char ville[]){
+    AVL* nouveau = (AVL*)malloc(sizeof(AVL));
+    if(nouveau!=NULL){
+        nouveau->id_trajet=id_trajet;
+        strcpy(nouveau->ville, ville);
+        nouveau->compteur_total=1;
+        nouveau->compteur_depart=1;
+        //Allouer de la mémoire pour le tableau d'identifiants de trajets
+        nouveau->tab = (int*)malloc(sizeof(int));
+        if(nouveau->tab != NULL){
+            nouveau->tab[0] = id_trajet;
+        }
+        else{
+            // Gestion de l'erreur d'allocation mémoire
+            free(nouveau);
+            return NULL;
+        }
+        nouveau->tab=NULL;
+        nouveau->gauche=NULL;
+        nouveau->droite=NULL;
+        nouveau->equilibre=0;
     }
-    return n->hauteur;
+    return nouveau;
 }
 
-// Fonction pour obtenir le maximum de deux entiers
+//Fonction pour obtenir le maximum de deux entiers
 int max(int a, int b){
     return (a > b) ? a : b;
 }
 
-// Fonction pour créer un nouveau nœud Ville
-Ville* creerVille(char nom[50]){
-    Ville* ville = (Ville*)malloc(sizeof(Ville));
-    strcpy(ville->nom, nom);
-    ville->trajets = 1; // Nouvelle ville, donc 1 trajet
-    ville->conducteurs = 1; // Nouveau conducteur, donc 1 conducteur
-    ville->gauche = NULL;
-    ville->droite = NULL;
-    ville->hauteur = 1; // Nouveau nœud a une hauteur initiale de 1
-    return ville;
+//Fonction pour obtenir le minimum de deux entiers
+int min(int a, int b){
+    return (a < b) ? a : b;
 }
 
-// Fonction pour effectuer une rotation simple à droite
-Ville* rotationDroite(Ville* y){
-    Ville* x = y->gauche;
-    Ville* T2 = x->droite;
-    // Effectuer la rotation
-    x->droite = y;
-    y->gauche = T2;
-    // Mettre à jour les hauteurs
-    y->hauteur = max(hauteur(y->gauche), hauteur(y->droite)) + 1;
-    x->hauteur = max(hauteur(x->gauche), hauteur(x->droite)) + 1;
-    return x;
+//Fonction pour effectuer une rotation simple à droite
+AVL* rotationDroite(AVL* a){
+    AVL* pivot;
+    int eq_a,eq_p;
+    pivot=a->fg;
+    a->fg=pivot->fd;
+    pivot->fd=a;
+    eq_a=a->equilibre;
+    eq_p=pivot->equilibre;
+    a->equilibre=eq_a-min(eq_p,0)+1;
+    pivot->equilibre=max(max(eq_a+2,eq_a+eq_p+2),eq_p+1);
+    a=pivot;
+    return a;
 }
 
-// Fonction pour effectuer une rotation simple à gauche
-Ville* rotationGauche(Ville* x){
-    Ville* y = x->droite;
-    Ville* T2 = y->gauche;
-    // Effectuer la rotation
-    y->gauche = x;
-    x->droite = T2;
-    // Mettre à jour les hauteurs
-    x->hauteur = max(hauteur(x->gauche), hauteur(x->droite)) + 1;
-    y->hauteur = max(hauteur(y->gauche), hauteur(y->droite)) + 1;
-    return y;
+//Fonction pour effectuer une rotation simple à gauche
+AVL* rotationGauche(AVL* a){
+    AVL* pivot;
+    int eq_a,eq_p;
+    pivot=a->fd;
+    a->fd=pivot->fg;
+    pivot->fg=a;
+    eq_a=a->equilibre;
+    eq_p=pivot->equilibre;
+    a->equilibre=eq_a-max(eq_p,0)-1;
+    pivot->equilibre=min(min(eq_a-2,eq_a+eq_p-2),eq_p-1);
+    a=pivot;
+    return a;
 }
 
-// Fonction pour obtenir le facteur d'équilibre d'un nœud
-int facteurEquilibre(Ville* n){
-    if(n == NULL){
-        return 0;
+//Fonction pour effectuer une rotation double à gauche
+AVL* douleRotationGauche(AVL* a){
+    a->fd=rotationDroite(a->fd);
+    return rotationGauche(a);
+}
+
+//Fonction pour effectuer une rotation double à droite
+AVL* douleRotationDroite(AVL* a){
+    a->fg=rotationgauche(a->fg);
+    return rotationDroite(a);
+}
+
+//Fonction pour équilibrer l'arbre
+AVL* equilibreAVL(AVL* a){
+    if(a->equilibre>=2){
+        if(a->fd->equilibre>=0){
+            return rotationGauche(a);
+        }
+        else{
+            return douleRotationGauche(a);
+        }
     }
-    return hauteur(n->gauche) - hauteur(n->droite);
+    else if(a->equilibre<=0){
+        if(a->fg->equilibre<=0){
+            return rotationDroite(a);
+        }
+        else{
+            return douleRotationDroite(a);
+        }
+    }
+    return a;
 }
 
 // Fonction principale pour ajouter une ville à la structure AVL
-Ville* ajouterVille(Ville* racine, char nom[50]){
-    // Effectuer l'insertion normale de l'arbre binaire de recherche
-    if(racine == NULL){
-        return creerVille(nom);
+AVL* ajouterAVL(AVL* a, char ville[],int id_trajet, int *h,char type[]){
+    if(a == NULL){
+        *h=1;
+        a=creerAVL(id_trajet, ville);
+        return a;
     }
-    if(strcmp(nom, racine->nom) < 0){
-        racine->gauche = ajouterVille(racine->gauche, nom);
+    int compare=strcmp(ville, a->ville)
+    if(compare=0){
+        for(int i=0;a->tab[i]==NULL,i++){
+            if(id_trajet==a->tab[i]){
+                return a;
+            }
+        }
+        else{
+            //Ville déjà présente donc on met à jour les informations nécessaires
+            a->compteur_total++;
+            if(strcmp(type,depart)){
+                a->compteur_depart++
+            }
+            //Réallouer le tableau avec une taille augmentée
+            int* temp = (int*)realloc(a->tab, a->trajets_depart * sizeof(int));
+            if(temp != NULL){
+                a->tab = temp;
+                a->tab[a->trajets_depart - 1] = id_trajet;
+            }
+            else{
+            // Gestion de l'erreur d'allocation mémoire
+            fprintf(stderr, "Erreur lors de la réallocation du tableau d'identifiants de trajets.\n");
+            exit(EXIT_FAILURE);
+            }
+        }
     }
-    else if(strcmp(nom, racine->nom) > 0){
-        racine->droite = ajouterVille(racine->droite, nom);
+    else if(compare < 0){
+        a->fg = ajouterAVL(a->fg, ville, id_trajet, h);
+        *h=-*h;
     }
     else{
-        // La ville existe déjà, mise à jour des compteurs
-        racine->trajets++;
-        racine->conducteurs++;
-        return racine;
+        a->fd = ajouterAVL(a->fd, ville, id_trajet, h);
     }
-    // Mettre à jour la hauteur du nœud actuel
-    racine->hauteur = 1 + max(hauteur(racine->gauche), hauteur(racine->droite));
-    // Obtenir le facteur d'équilibre du nœud actuel
-    int equilibre = facteurEquilibre(racine);
-    // Effectuer les rotations nécessaires pour rééquilibrer l'arbre
-    // Rotation à droite simple
-    if(equilibre > 1 && strcmp(nom, racine->gauche->nom) < 0){
-        return rotationDroite(racine);
-    }
-    // Rotation à gauche simple
-    if(equilibre < -1 && strcmp(nom, racine->droite->nom) > 0){
-        return rotationGauche(racine);
-    }
-    // Rotation à gauche-droite (double rotation)
-    if(equilibre > 1 && strcmp(nom, racine->gauche->nom) > 0){
-        racine->gauche = rotationGauche(racine->gauche);
-        return rotationDroite(racine);
-    }
-    // Rotation à droite-gauche (double rotation)
-    if(equilibre < -1 && strcmp(nom, racine->droite->nom) < 0){
-        racine->droite = rotationDroite(racine->droite);
-        return rotationGauche(racine);
-    }
-    // Aucune rotation nécessaire
-    return racine;
+    if(*h!=0){
+		a->equilibre=a->equilibre+*h;
+		a=equilibrageAVL(a);
+		if(a->equilibre==0){
+			*h=0;
+		}
+		else{
+			*h=1;
+		}
+	}
+    return a;
 }
 
-void libererMemoire(Ville* racine){
-    if(racine != NULL){
-        libererMemoire(racine->gauche);
-        libererMemoire(racine->droite);
-        free(racine);
+void libererMemoire(AVL* a){
+    if(a!= NULL){
+        libererMemoire(a->fg);
+        libererMemoire(a->fd);
+        free(a);
     }
 }
 
