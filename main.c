@@ -87,7 +87,7 @@ AVL* douleRotationGauche(AVL* a){
 
 //Fonction pour effectuer une rotation double à droite
 AVL* douleRotationDroite(AVL* a){
-    a->fg=rotationgauche(a->fg);
+    a->fg=rotationGauche(a->fg);
     return rotationDroite(a);
 }
 
@@ -129,7 +129,7 @@ AVL* ajouterAVL(AVL* a, char ville[],int id_trajet, int *h,char type[]){
         else{
             //Ville déjà présente donc on met à jour les informations nécessaires
             a->compteur_total++;
-            if(strcmp(type,depart)){
+            if(strcmp(type,"depart")){
                 a->compteur_depart++;
             }
             //Réallouer le tableau avec une taille augmentée
