@@ -220,25 +220,43 @@ AVL* copierEtTrierParCompteurTotal(AVL* ancienAVL, AVL* nouveauAVL){
     return nouveauAVL;
 }
 
-//Fonction qui permet de stocker les 10 villes qui ont le plus de trajets
-void parcoursLimite(AVL* a, char* mode, FILE* fichierSortie, int* compteur){
+//Fonction pour comparer deux chaînes de caractères (utilisée pour le tri alphabétique)
+int comparerVilles(const void* a, const void* b) {
+    AVL* villeA = *((AVL**)a);
+    AVL* villeB = *((AVL**)b);
+    return strcmp(villeA->ville, villeB->ville);
+}
+
+// Fonction qui permet de stocker les 10 villes qui ont le plus de trajets (triées par ordre alphabétique)
+void parcoursLimite(AVL* a, char* mode, FILE* fichierSortie, int* compteur, AVL** tableau) {
     if (a != NULL && *compteur < 10) {
-        parcoursLimite(a->fd, mode, fichierSortie, compteur);
-        // Si le nombre maximal de valeurs est atteint, terminer la récursion
-        if(*compteur >= 10){
+        parcoursLimite(a->fd, mode, fichierSortie, compteur, tableau);
+        
+        if (*compteur >= 10) {
             return;
         }
-        // Affichage d'une valeur
-        fprintf(fichierSortie, "%s %d %d\n", a->ville, a->compteur_total, a->compteur_depart);
-        (*compteur)++;  // Incrémentation du compteur
-        parcoursLimite(a->fg, mode, fichierSortie, compteur);
+
+        // Stocker la ville dans le tableau
+        tableau[*compteur] = a;
+        (*compteur)++;
+
+        parcoursLimite(a->fg, mode, fichierSortie, compteur, tableau);
     }
 }
 
-//Fonction qui crée un compteur avant le stockage des données
-void parcours(AVL* a, char* mode, FILE* fichierSortie){
+// Fonction qui crée un compteur avant le stockage des données
+void parcours(AVL* a, char* mode, FILE* fichierSortie) {
     int compteur = 0;  // Initialiser le compteur
-    parcoursLimite(a, mode, fichierSortie, &compteur);
+    AVL* tableau[10];  // Tableau pour stocker les 10 villes
+    parcoursLimite(a, mode, fichierSortie, &compteur, tableau);
+
+    // Trier le tableau par ordre alphabétique
+    qsort(tableau, compteur, sizeof(AVL*), comparerVilles);
+
+    // Écrire les données triées dans le fichier de sortie
+    for (int i = 0; i < compteur; i++) {
+        fprintf(fichierSortie, "%s;%d;%d\n", tableau[i]->ville, tableau[i]->compteur_total, tableau[i]->compteur_depart);
+    }
 }
 
 //Fonction qui libère la mémoire de l'AVL
