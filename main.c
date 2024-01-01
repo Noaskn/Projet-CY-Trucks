@@ -5,10 +5,13 @@
 //Structure AVL
 typedef struct AVL{
     int id_trajet;
+    float distance;
     char ville[50];
-    int *tab;
+    int *tab_id;
+    float *tab_distance;
     int compteur_total;
     int compteur_depart;
+    int compteur_etape;
     struct AVL* fg;
     struct AVL* fd;
     int hauteur;
@@ -44,9 +47,32 @@ AVL* creerAVL(int id_trajet, char ville[]){
         nouveau->compteur_total=0;
         nouveau->compteur_depart=0;
         //Allouer de la mémoire pour le tableau d'identifiants de trajets
-        nouveau->tab = (int*)malloc(sizeof(int));
-        if(nouveau->tab != NULL){
-            nouveau->tab[0] = id_trajet;
+        nouveau->tab_id = (int*)malloc(sizeof(int));
+        if(nouveau->tab_id != NULL){
+            nouveau->tab_id[0] = id_trajet;
+        }
+        else{
+            // Gestion de l'erreur d'allocation mémoire
+            free(nouveau);
+            return NULL;
+        }
+        nouveau->fg=NULL;
+        nouveau->fd=NULL;
+        nouveau->hauteur=1;
+    }
+    return nouveau;
+}
+
+AVL* creerAVL2(int id_trajet, float distance){
+    AVL* nouveau = (AVL*)malloc(sizeof(AVL));
+    if(nouveau!=NULL){
+        nouveau->id_trajet=id_trajet;
+        nouveau->distance=distance;
+        nouveau->compteur_etape=1;
+        //Allouer de la mémoire pour le tableau des distances
+        nouveau->tab_distance = (float*)malloc(sizeof(float));
+        if(nouveau->tab_distance != NULL){
+            nouveau->tab_distance[0] = distance;
         }
         else{
             // Gestion de l'erreur d'allocation mémoire
@@ -88,6 +114,40 @@ AVL* rotationDroite(AVL *x) {
     return y;
 }
 
+AVL* insertionCroissant(AVL* a, float distance) {
+    // Réallouer le tableau si ce n'est pas déjà alloué
+    if (a->tab_distance == NULL) {
+        a->tab_distance = (float*)malloc(sizeof(float));
+        if (a->tab_distance != NULL) {
+            a->tab_distance[0] = distance;
+            a->compteur_etape++;
+        } else {
+            // Gestion de l'erreur d'allocation mémoire
+            fprintf(stderr, "Erreur lors de l'allocation du tableau des distances.\n");
+            exit(EXIT_FAILURE);
+        }
+    } else {
+        // Réallouer le tableau avec une taille augmentée
+        a->tab_distance = (float*)realloc(a->tab_distance, (a->compteur_etape + 1) * sizeof(float));
+        if (a->tab_distance != NULL) {
+            int i = a->compteur_etape - 1;
+            // Trouver la position d'insertion
+            while (i >= 0 && a->tab_distance[i] > distance) {
+                a->tab_distance[i + 1] = a->tab_distance[i];
+                i--;
+            }
+            // Insérer le nouvel élément à la position correcte
+            a->tab_distance[i + 1] = distance;
+            a->compteur_etape++;
+        } else {
+            // Gestion de l'erreur d'allocation mémoire
+            fprintf(stderr, "Erreur lors de la réallocation du tableau des distances.\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+    return a;
+}
+
 //Fonction pour ajouter une ville à la structure AVL
 AVL* ajouterAVL(AVL* a, char ville[],int id_trajet){
     if(a == NULL){
@@ -96,9 +156,9 @@ AVL* ajouterAVL(AVL* a, char ville[],int id_trajet){
     int compare=strcmp(ville, a->ville);
     if(compare==0){
         int i=0;
-        while(a->tab[i]!=0){
+        while(a->tab_id[i]!=0){
             //Ville et identifiant déjà présents donc on met à jour le compteur de ville de départ
-            if(id_trajet==a->tab[i]){
+            if(id_trajet==a->tab_id[i]){
                 a->compteur_depart++;
                 return a;
             }
@@ -107,10 +167,10 @@ AVL* ajouterAVL(AVL* a, char ville[],int id_trajet){
         //Ville déjà présente donc on met à jour le compteur total et le tableau comptenant les identifiants
         a->compteur_total++;
         //Réallouer le tableau avec une taille augmentée
-        int* temp = (int*)realloc(a->tab, a->compteur_total * sizeof(int));
+        int* temp = (int*)realloc(a->tab_id, a->compteur_total * sizeof(int));
         if(temp != NULL){
-            a->tab = temp;
-            a->tab[a->compteur_total - 1] = id_trajet;
+            a->tab_id = temp;
+            a->tab_id[a->compteur_total - 1] = id_trajet;
         }
         else{
             // Gestion de l'erreur d'allocation mémoire
@@ -149,6 +209,53 @@ AVL* ajouterAVL(AVL* a, char ville[],int id_trajet){
         return rotationGauche(a);
     }
     return a;
+}
+
+AVL* ajouterAVL2(AVL* a, float distance,int id_trajet){
+    if(a == NULL){
+        return creerAVL2(id_trajet, distance);
+    }
+    if(a->id_trajet == id_trajet){
+        a = insertionCroissant(a,distance);
+    }
+    else if(id_trajet<a->id_trajet){
+        a->fg = ajouterAVL2(a->fg,distance,id_trajet);
+    }
+    else{
+        a->fd = ajouterAVL2(a->fd,distance,id_trajet);
+    }
+    a->hauteur = 1 + max(hauteur(a->fg), hauteur(a->fd));
+    int eq = equilibre(a);
+    // Cas de l'équilibre à gauche-gauche
+    if (eq > 1 && id_trajet < a->fg->id_trajet) {
+        return rotationDroite(a);
+    }
+
+    // Cas de l'équilibre à droite-droite
+    if (eq < -1 && id_trajet > a->fd->id_trajet) {
+        return rotationGauche(a);
+    }
+
+    // Cas de l'équilibre à gauche-droite
+    if (eq > 1 && id_trajet > a->fg->id_trajet) {
+        a->fg = rotationGauche(a->fg);
+        return rotationDroite(a);
+    }
+
+    // Cas de l'équilibre à droite-gauche
+    if (eq < -1 && id_trajet < a->fd->id_trajet) {
+        a->fd = rotationDroite(a->fd);
+        return rotationGauche(a);
+    }
+    return a;
+}
+
+float moyenne(AVL* a){
+    float res=0;
+    for(int i=0;i<a->compteur_etape;i++){
+        res+=a->tab_distance[i];
+    }
+    return res/a->compteur_etape;
 }
 
 //Fonction pour créer un nouveau nœud
@@ -228,34 +335,42 @@ int comparerVilles(const void* a, const void* b) {
 }
 
 // Fonction qui permet de stocker les 10 villes qui ont le plus de trajets (triées par ordre alphabétique)
-void parcoursLimite(AVL* a, char* mode, FILE* fichierSortie, int* compteur, AVL** tableau) {
+void parcoursLimite(AVL* a, char* mode, FILE* fichierSortie, int* compteur, AVL** tab_id) {
     if (a != NULL && *compteur < 10) {
-        parcoursLimite(a->fd, mode, fichierSortie, compteur, tableau);
+        parcoursLimite(a->fd, mode, fichierSortie, compteur, tab_id);
         
         if (*compteur >= 10) {
             return;
         }
 
-        // Stocker la ville dans le tableau
-        tableau[*compteur] = a;
+        // Stocker la ville dans le tab_idleau
+        tab_id[*compteur] = a;
         (*compteur)++;
 
-        parcoursLimite(a->fg, mode, fichierSortie, compteur, tableau);
+        parcoursLimite(a->fg, mode, fichierSortie, compteur, tab_id);
     }
 }
 
 // Fonction qui crée un compteur avant le stockage des données
 void parcours(AVL* a, char* mode, FILE* fichierSortie) {
     int compteur = 0;  // Initialiser le compteur
-    AVL* tableau[10];  // Tableau pour stocker les 10 villes
-    parcoursLimite(a, mode, fichierSortie, &compteur, tableau);
+    AVL* tab_id[10];  // tableau pour stocker les 10 villes
+    parcoursLimite(a, mode, fichierSortie, &compteur, tab_id);
 
     // Trier le tableau par ordre alphabétique
-    qsort(tableau, compteur, sizeof(AVL*), comparerVilles);
+    qsort(tab_id, compteur, sizeof(AVL*), comparerVilles);
 
     // Écrire les données triées dans le fichier de sortie
     for (int i = 0; i < compteur; i++) {
-        fprintf(fichierSortie, "%s;%d;%d\n", tableau[i]->ville, tableau[i]->compteur_total, tableau[i]->compteur_depart);
+        fprintf(fichierSortie, "%s;%d;%d\n", tab_id[i]->ville, tab_id[i]->compteur_total, tab_id[i]->compteur_depart);
+    }
+}
+
+void infixe(AVL* a, char* mode, FILE* fichierSortie){
+    if(a!=NULL){
+        infixe(a->fd,mode,fichierSortie);
+        fprintf(fichierSortie, "%d;%f;%f;%f\n",a->id_trajet, a->tab_distance[0], moyenne(a), a->tab_distance[a->compteur_etape-1]);
+        infixe(a->fg,mode,fichierSortie);
     }
 }
 
@@ -293,8 +408,6 @@ int main(int argc, char *argv[]){
             char ville_arrivee[100];
             int id_trajet;
             int id_etape;
-            float distance;
-            char nom[100];
             char *token = strtok(ligne, ";");
             //Récupération des données nécessaires au traitement
             if(token != NULL){
@@ -331,9 +444,57 @@ int main(int argc, char *argv[]){
         parcours(nouvelAVL,argv[3],fichierSortie);
         //Libération de la mémoire de l'AVL
         libererMemoire(a);
+        //Fermeture des fichiers d'entrée et de sortie
+        fclose(fichierEntree);
+        fclose(fichierSortie);
     }
-    //Fermeture des fichiers d'entrée et de sortie
-    fclose(fichierEntree);
-    fclose(fichierSortie);
+    if(strcmp(argv[2], "-s") == 0){
+        char ligne[7000000];
+        AVL* a=NULL;
+        while(fgets(ligne,sizeof(ligne),fichierEntree)){
+            int id_trajet;
+            int id_etape;
+            char ville_depart[100];
+            char ville_arrivee[100];
+            float distance;
+            char *token = strtok(ligne, ";");
+            if(token != NULL) {
+                if(sscanf(token, "%d", &id_trajet) != 1){
+                    continue; // Passer à la ligne suivante
+                }
+                token = strtok(NULL, ";");
+                if(token != NULL){
+                    if(sscanf(token, "%d", &id_etape) != 1){
+                        continue; // Passer à la ligne suivante
+                    }
+                    token = strtok(NULL, ";");
+                    if(token != NULL){
+                        strncpy(ville_depart, token, sizeof(ville_depart));
+                        ville_depart[sizeof(ville_depart) - 1] = '\0';
+                        token = strtok(NULL, ";");
+                        if(token != NULL){
+                            strncpy(ville_arrivee, token, sizeof(ville_arrivee));
+                            ville_arrivee[sizeof(ville_arrivee) - 1] = '\0';
+                            token = strtok(NULL, ";");
+                            if(token != NULL){
+                                if(sscanf(token, "%f", &distance) != 1){
+                                    continue; // Passer à la ligne suivante
+                                }
+                                //Affichage de ce qui a été récupéré (FAUDRA L'ENLEVER)
+                                printf("%d %f\n", id_trajet, distance);
+                                a = ajouterAVL2(a, id_trajet, distance);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        infixe(a,argv[3],fichierSortie);
+        libererMemoire(a);
+        //Fermeture des fichiers d'entrée et de sortie
+        fclose(fichierEntree);
+        fclose(fichierSortie);
+    }
+    
     return 0;
 }
