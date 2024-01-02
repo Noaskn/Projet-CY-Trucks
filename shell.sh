@@ -62,7 +62,7 @@ case $traitement in
 #Traitement qui donne les 10 conducteurs qui ont la plus longue distance par ordre décroissant avec affichage du temps d'exécution
 -d2)
     debut_temps=$(date +%s)
-    awk -F';' '{distances[$6]+=$5} END {for (i in distances) print distances[i], i}' $fichier_csv | sort -rn | head -n 10 > "$temp/traitement_d2.txt"
+    LC_NUMERIC="C" awk -F';' '{distances[$6]+=$5} END {for (i in distances) printf "%.6f;%s\n", distances[i], i}' $fichier_csv | sort -t';' -k1,1rn | head -n 10 | awk -F';' '{printf "%s;%s\n", $2, $1}' > "$temp/traitement_d2.txt"
     fin_temps=$(date +%s)
     duree=$((fin_temps - debut_temps))
     echo "Temps d'exécution du traitement d2 : $duree secondes";;
@@ -70,7 +70,7 @@ case $traitement in
 #Traitement qui donne les 10 numéros d'identifiant des trajets qui ont la plus longue distance par ordre croissant avec affichage du temps d'exécution
 -l)
     debut_temps=$(date +%s)
-    awk -F';' '{distances[$1]+=$5} END {for (i in distances) print distances[i], i}' $fichier_csv | sort -k1,1nr | head -n 10 | sort -k2,2n > "$temp/traitement_l.txt"
+    LC_NUMERIC="C" awk -F';' '{distances[$1] += $5} END {for (i in distances) printf "%.6f;%d\n", distances[i], i}' $fichier_csv | sort -t';' -k1,1nr | head -n 10 | awk -F';' '{print $2";"$1}' | sort -t';' -k1,1nr > "$temp/traitement_l.txt"
     fin_temps=$(date +%s)
     duree=$((fin_temps - debut_temps))
     echo "Temps d'exécution du traitement l : $duree secondes";;
