@@ -5,13 +5,14 @@
 //Structure AVL
 typedef struct AVL{
     int id_trajet;
+    int id_etape;
     float distance;
     char ville[50];
     int *tab_id;
     float *tab_distance;
     int compteur_total;
     int compteur_depart;
-    int compteur_etape;
+    int compteur_distance;
     struct AVL* fg;
     struct AVL* fd;
     int hauteur;
@@ -39,13 +40,18 @@ int max(int a, int b){
 }
 
 //Fonction pour créer un nouveau nœud
-AVL* creerAVL(int id_trajet, char ville[]){
+AVL* creerAVL(int id_trajet, int id_etape, char ville[], char type[]){
     AVL* nouveau = (AVL*)malloc(sizeof(AVL));
     if(nouveau!=NULL){
         nouveau->id_trajet=id_trajet;
+        nouveau->id_etape=id_etape;
         strcpy(nouveau->ville, ville);
         nouveau->compteur_total=0;
         nouveau->compteur_depart=0;
+        //Si c'est la première étape d'un trajet on augmente le compteur
+        if(strcmp(type,"depart")==0 && id_etape==1){
+            nouveau->compteur_depart++;
+        }
         //Allouer de la mémoire pour le tableau d'identifiants de trajets
         nouveau->tab_id = (int*)malloc(sizeof(int));
         if(nouveau->tab_id != NULL){
@@ -68,7 +74,7 @@ AVL* creerAVL2(int id_trajet, float distance){
     if(nouveau!=NULL){
         nouveau->id_trajet=id_trajet;
         nouveau->distance=distance;
-        nouveau->compteur_etape=1;
+        nouveau->compteur_distance=1;
         //Allouer de la mémoire pour le tableau des distances
         nouveau->tab_distance = (float*)malloc(sizeof(float));
         if(nouveau->tab_distance != NULL){
@@ -114,58 +120,31 @@ AVL* rotationDroite(AVL *x) {
     return y;
 }
 
-AVL* insertionCroissant(AVL* a, float distance) {
-    // Réallouer le tableau si ce n'est pas déjà alloué
-    if (a->tab_distance == NULL) {
-        a->tab_distance = (float*)malloc(sizeof(float));
-        if (a->tab_distance != NULL) {
-            a->tab_distance[0] = distance;
-            a->compteur_etape++;
-        } else {
-            // Gestion de l'erreur d'allocation mémoire
-            fprintf(stderr, "Erreur lors de l'allocation du tableau des distances.\n");
-            exit(EXIT_FAILURE);
-        }
-    } else {
-        // Réallouer le tableau avec une taille augmentée
-        a->tab_distance = (float*)realloc(a->tab_distance, (a->compteur_etape + 1) * sizeof(float));
-        if (a->tab_distance != NULL) {
-            int i = a->compteur_etape - 1;
-            // Trouver la position d'insertion
-            while (i >= 0 && a->tab_distance[i] > distance) {
-                a->tab_distance[i + 1] = a->tab_distance[i];
-                i--;
-            }
-            // Insérer le nouvel élément à la position correcte
-            a->tab_distance[i + 1] = distance;
-            a->compteur_etape++;
-        } else {
-            // Gestion de l'erreur d'allocation mémoire
-            fprintf(stderr, "Erreur lors de la réallocation du tableau des distances.\n");
-            exit(EXIT_FAILURE);
-        }
-    }
-    return a;
-}
-
 //Fonction pour ajouter une ville à la structure AVL
-AVL* ajouterAVL(AVL* a, char ville[],int id_trajet){
+AVL* ajouterAVL(AVL* a, char ville[],int id_trajet, int id_etape, char type[]){
     if(a == NULL){
-        return creerAVL(id_trajet, ville);
+        return creerAVL(id_trajet, id_etape, ville, type);
     }
     int compare=strcmp(ville, a->ville);
     if(compare==0){
         int i=0;
         while(a->tab_id[i]!=0){
-            //Ville et identifiant déjà présents donc on met à jour le compteur de ville de départ
+            //Ville et identifiant déjà présents
             if(id_trajet==a->tab_id[i]){
-                a->compteur_depart++;
+                 //Si c'est la première étape d'un trajet on augmente le compteur
+                if(strcmp(type,"depart")==0 && id_etape==1){
+                    a->compteur_depart++;
+                }
                 return a;
             }
             i++;
         }
         //Ville déjà présente donc on met à jour le compteur total et le tableau comptenant les identifiants
         a->compteur_total++;
+         //Si c'est la première étape d'un trajet on augmente le compteur
+        if(strcmp(type,"depart")==0 && id_etape==1){
+            a->compteur_depart++;
+        }
         //Réallouer le tableau avec une taille augmentée
         int* temp = (int*)realloc(a->tab_id, a->compteur_total * sizeof(int));
         if(temp != NULL){
@@ -179,10 +158,10 @@ AVL* ajouterAVL(AVL* a, char ville[],int id_trajet){
         }
     }
     else if(compare < 0){
-        a->fg = ajouterAVL(a->fg, ville, id_trajet);
+        a->fg = ajouterAVL(a->fg, ville, id_trajet, id_etape, type);
     }
     else{
-        a->fd = ajouterAVL(a->fd, ville, id_trajet);
+        a->fd = ajouterAVL(a->fd, ville, id_trajet, id_etape, type);
         
     }
     a->hauteur = 1 + max(hauteur(a->fg), hauteur(a->fd));
@@ -216,7 +195,13 @@ AVL* ajouterAVL2(AVL* a, float distance,int id_trajet){
         return creerAVL2(id_trajet, distance);
     }
     if(a->id_trajet == id_trajet){
-        a = insertionCroissant(a,distance);
+        a->tab_distance = (float*)realloc(a->tab_distance, sizeof(float)*(a->compteur_distance+1));
+        if(a->tab_distance == NULL){
+        fprintf(stderr, "Erreur d'allocation de mémoire.\n");
+        exit(EXIT_FAILURE);
+        }
+        // Ajouter la nouvelle distance
+        a->tab_distance[a->compteur_distance++] = distance;
     }
     else if(id_trajet<a->id_trajet){
         a->fg = ajouterAVL2(a->fg,distance,id_trajet);
@@ -252,11 +237,40 @@ AVL* ajouterAVL2(AVL* a, float distance,int id_trajet){
 
 float moyenne(AVL* a){
     float res=0;
-    for(int i=0;i<a->compteur_etape;i++){
+    for(int i=0;i<a->compteur_distance;i++){
         res+=a->tab_distance[i];
     }
-    return res/a->compteur_etape;
+    return res/a->compteur_distance;
 }
+
+float trouverMin(AVL* a){
+    if(a->compteur_distance <= 0 || a->tab_distance == NULL){
+        fprintf(stderr, "Tableau invalide.\n");
+        return -1;  // Valeur d'erreur
+    }
+    float min = a->tab_distance[0];
+    for(int i = 1; i < a->compteur_distance; i++){
+        if(a->tab_distance[i] < min){
+            min = a->tab_distance[i];
+        }
+    }
+    return min;
+}
+
+float trouverMax(AVL* a){
+    if(a->compteur_distance <= 0 || a->tab_distance == NULL){
+        fprintf(stderr, "Tableau invalide.\n");
+        return -1;  // Valeur d'erreur
+    }
+    float max = a->tab_distance[0];
+    for(int i = 1; i < a->compteur_distance; i++){
+        if(a->tab_distance[i] > max){
+            max = a->tab_distance[i];
+        }
+    }
+    return max;
+}
+
 
 //Fonction pour créer un nouveau nœud
 AVL* creerAVLtrier(char ville[],int compteur_total,int compteur_depart){
@@ -369,7 +383,11 @@ void parcours(AVL* a, char* mode, FILE* fichierSortie) {
 void infixe(AVL* a, char* mode, FILE* fichierSortie){
     if(a!=NULL){
         infixe(a->fd,mode,fichierSortie);
-        fprintf(fichierSortie, "%d;%f;%f;%f\n",a->id_trajet, a->tab_distance[0], moyenne(a), a->tab_distance[a->compteur_etape-1]);
+        fprintf(fichierSortie, "%d;%f;%f;%f\n",a->id_trajet, trouverMin(a), moyenne(a), trouverMax(a));
+        for (int i=0; i< a->compteur_distance;i++){
+            fprintf(fichierSortie, "%f  ", a->tab_distance[i]);
+            fprintf(fichierSortie, "\n");
+        }
         infixe(a->fg,mode,fichierSortie);
     }
 }
@@ -428,11 +446,11 @@ int main(int argc, char *argv[]){
                             strncpy(ville_arrivee, token, sizeof(ville_arrivee));
                             ville_arrivee[sizeof(ville_arrivee) - 1] = '\0';
                             //Affichage de ce qui a été récupéré (FAUDRA L'ENLEVER)
-                            printf("%d %s %s\n", id_trajet, ville_depart, ville_arrivee);
+                            printf("%d %d %s %s\n", id_trajet, id_etape, ville_depart, ville_arrivee);
                             //Ajout dans l'AVL de la ville de départ
-                            a = ajouterAVL(a, ville_depart, id_trajet);
+                            a = ajouterAVL(a, ville_depart, id_trajet, id_etape, "depart");
                             //Ajout dans l'AVL de la ville d'arrivée
-                            a = ajouterAVL(a, ville_arrivee, id_trajet);
+                            a = ajouterAVL(a, ville_arrivee, id_trajet, id_etape, "arrivee");
                         }
                     }
                 }
