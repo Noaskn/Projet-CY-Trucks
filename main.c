@@ -44,7 +44,7 @@ int maxi(int a, int b){
 }
 
 //Fonction pour créer un nouveau nœud
-AVL* creerAVL(int id_trajet, int id_etape, char ville[], char type[]){
+AVL* creerAVL_t(int id_trajet, int id_etape, char ville[], char type[]){
     AVL* nouveau = (AVL*)malloc(sizeof(AVL));
     if(nouveau!=NULL){
         nouveau->id_trajet=id_trajet;
@@ -73,7 +73,7 @@ AVL* creerAVL(int id_trajet, int id_etape, char ville[], char type[]){
     return nouveau;
 }
 
-AVL* creerAVL2(int id_trajet, float distance){
+AVL* creerAVL_s(int id_trajet, float distance){
     AVL* nouveau = (AVL*)malloc(sizeof(AVL));
     if(nouveau!=NULL){
         nouveau->id_trajet=id_trajet;
@@ -129,9 +129,9 @@ AVL* rotationDroite(AVL *x) {
 }
 
 //Fonction pour ajouter une ville à la structure AVL
-AVL* ajouterAVL(AVL* a, char ville[],int id_trajet, int id_etape, char type[]){
+AVL* ajouterAVL_t(AVL* a, char ville[],int id_trajet, int id_etape, char type[]){
     if(a == NULL){
-        return creerAVL(id_trajet, id_etape, ville, type);
+        return creerAVL_t(id_trajet, id_etape, ville, type);
     }
     int compare=strcmp(ville, a->ville);
     if(compare==0){
@@ -166,10 +166,10 @@ AVL* ajouterAVL(AVL* a, char ville[],int id_trajet, int id_etape, char type[]){
         }
     }
     else if(compare < 0){
-        a->fg = ajouterAVL(a->fg, ville, id_trajet, id_etape, type);
+        a->fg = ajouterAVL_t(a->fg, ville, id_trajet, id_etape, type);
     }
     else{
-        a->fd = ajouterAVL(a->fd, ville, id_trajet, id_etape, type);
+        a->fd = ajouterAVL_t(a->fd, ville, id_trajet, id_etape, type);
         
     }
     a->hauteur = 1 + maxi(hauteur(a->fg), hauteur(a->fd));
@@ -206,9 +206,9 @@ float moyenne(AVL* a){
     return res/a->compteur_distance;
 }
 
-AVL* ajouterAVL2(AVL* a, float distance,int id_trajet){
+AVL* ajouterAVL_s(AVL* a, float distance,int id_trajet){
     if(a == NULL){
-        return creerAVL2(id_trajet, distance);
+        return creerAVL_s(id_trajet, distance);
     }
     if(a->id_trajet == id_trajet){
         a->compteur_distance++;
@@ -231,10 +231,10 @@ AVL* ajouterAVL2(AVL* a, float distance,int id_trajet){
         }
     }
     else if(id_trajet<a->id_trajet){
-        a->fg = ajouterAVL2(a->fg,distance,id_trajet);
+        a->fg = ajouterAVL_s(a->fg,distance,id_trajet);
     }
     else{
-        a->fd = ajouterAVL2(a->fd,distance,id_trajet);
+        a->fd = ajouterAVL_s(a->fd,distance,id_trajet);
     }
     a->hauteur = 1 + maxi(hauteur(a->fg), hauteur(a->fd));
     int eq = equilibre(a);
@@ -263,7 +263,7 @@ AVL* ajouterAVL2(AVL* a, float distance,int id_trajet){
 }
 
 //Fonction pour créer un nouveau nœud
-AVL* creerAVLtrier(char ville[],int compteur_total,int compteur_depart){
+AVL* creerAVLtrier_t(char ville[],int compteur_total,int compteur_depart){
     AVL* nouveau = (AVL*)malloc(sizeof(AVL));
     if(nouveau!=NULL){
         strcpy(nouveau->ville, ville);
@@ -277,22 +277,22 @@ AVL* creerAVLtrier(char ville[],int compteur_total,int compteur_depart){
 }
 
 //Fonction pour ajouter un nouveau compteur
-AVL* ajouterAVLTrieParCompteurTotal(AVL* a, char ville[], int compteur_total, int compteur_depart){
+AVL* ajouterAVLtrier_t(AVL* a, char ville[], int compteur_total, int compteur_depart){
     if (a == NULL) {
-        return creerAVLtrier(ville,compteur_total,compteur_depart);
+        return creerAVLtrier_t(ville,compteur_total,compteur_depart);
     }
     if(a->compteur_total>compteur_total){
-        a->fg = ajouterAVLTrieParCompteurTotal(a->fg,ville,compteur_total,compteur_depart);
+        a->fg = ajouterAVLtrier_t(a->fg,ville,compteur_total,compteur_depart);
     }
     else if(a->compteur_total<compteur_total){
-        a->fd = ajouterAVLTrieParCompteurTotal(a->fd,ville,compteur_total,compteur_depart);
+        a->fd = ajouterAVLtrier_t(a->fd,ville,compteur_total,compteur_depart);
     }
     else{
         if(strcmp(ville,a->ville)<0){
-            a->fg = ajouterAVLTrieParCompteurTotal(a->fg,ville,compteur_total,compteur_depart);
+            a->fg = ajouterAVLtrier_t(a->fg,ville,compteur_total,compteur_depart);
         }
         else if(strcmp(ville,a->ville)>0){
-            a->fd = ajouterAVLTrieParCompteurTotal(a->fd,ville,compteur_total,compteur_depart);
+            a->fd = ajouterAVLtrier_t(a->fd,ville,compteur_total,compteur_depart);
         }
     }
     a->hauteur = 1 + maxi(hauteur(a->fg), hauteur(a->fd));
@@ -322,11 +322,11 @@ AVL* ajouterAVLTrieParCompteurTotal(AVL* a, char ville[], int compteur_total, in
 }
 
 //Fonction pour copier les données du premier AVL dans un second et faire un nouveau tri
-AVL* copierEtTrierParCompteurTotal(AVL* ancienAVL, AVL* nouveauAVL){
+AVL* copier_trier_t(AVL* ancienAVL, AVL* nouveauAVL){
     if(ancienAVL != NULL){
-        nouveauAVL = ajouterAVLTrieParCompteurTotal(nouveauAVL, ancienAVL->ville, ancienAVL->compteur_total, ancienAVL->compteur_depart);
-        nouveauAVL = copierEtTrierParCompteurTotal(ancienAVL->fg, nouveauAVL);
-        nouveauAVL = copierEtTrierParCompteurTotal(ancienAVL->fd, nouveauAVL);
+        nouveauAVL = ajouterAVLtrier_t(nouveauAVL, ancienAVL->ville, ancienAVL->compteur_total, ancienAVL->compteur_depart);
+        nouveauAVL = copier_trier_t(ancienAVL->fg, nouveauAVL);
+        nouveauAVL = copier_trier_t(ancienAVL->fd, nouveauAVL);
     }
     return nouveauAVL;
 }
@@ -338,10 +338,10 @@ int comparerVilles(const void* a, const void* b) {
     return strcmp(villeA->ville, villeB->ville);
 }
 
-// Fonction qui permet de stocker les 10 villes qui ont le plus de trajets (triées par ordre alphabétique)
-void parcoursLimite(AVL* a, char* mode, FILE* fichierSortie, int* compteur, AVL** tab_id) {
+// Fonction qui permet de stocker les 10 villes qui ont le plus de trajets
+void stockageDonnees_t(AVL* a, char* mode, FILE* fichierSortie, int* compteur, AVL** tab_id) {
     if (a != NULL && *compteur < 10) {
-        parcoursLimite(a->fd, mode, fichierSortie, compteur, tab_id);
+        stockageDonnees_t(a->fd, mode, fichierSortie, compteur, tab_id);
         
         if (*compteur >= 10) {
             return;
@@ -351,15 +351,15 @@ void parcoursLimite(AVL* a, char* mode, FILE* fichierSortie, int* compteur, AVL*
         tab_id[*compteur] = a;
         (*compteur)++;
 
-        parcoursLimite(a->fg, mode, fichierSortie, compteur, tab_id);
+        stockageDonnees_t(a->fg, mode, fichierSortie, compteur, tab_id);
     }
 }
 
-// Fonction qui crée un compteur avant le stockage des données
-void parcours(AVL* a, char* mode, FILE* fichierSortie) {
+// Fonction qui trie les données du fichier de sortie dans l'ordre alphabétique
+void tri_alphabetique(AVL* a, char* mode, FILE* fichierSortie) {
     int compteur = 0;  // Initialiser le compteur
     AVL* tab_id[10];  // tableau pour stocker les 10 villes
-    parcoursLimite(a, mode, fichierSortie, &compteur, tab_id);
+    stockageDonnees_t(a, mode, fichierSortie, &compteur, tab_id);
 
     // Trier le tableau par ordre alphabétique
     qsort(tab_id, compteur, sizeof(AVL*), comparerVilles);
@@ -371,7 +371,7 @@ void parcours(AVL* a, char* mode, FILE* fichierSortie) {
 }
 
 //Fonction pour créer un nouveau nœud
-AVL* creerAVLtrier2(float min, float max, float moy, int id_trajet){
+AVL* creerAVLtrier_s(float min, float max, float moy, int id_trajet){
     AVL* nouveau = (AVL*)malloc(sizeof(AVL));
     if(nouveau!=NULL){
         nouveau->min = min;
@@ -387,23 +387,23 @@ AVL* creerAVLtrier2(float min, float max, float moy, int id_trajet){
 }
 
 //Fonction pour ajouter une nouvelle différence de distance
-AVL* ajouterAVLTrieParDistanceDiff(AVL* a, float min, float max, float moy, int id_trajet){
+AVL* ajouterAVLtrier_s(AVL* a, float min, float max, float moy, int id_trajet){
     float diff=max-min;
     if (a == NULL) {
-        return creerAVLtrier2(min,max,moy,id_trajet);
+        return creerAVLtrier_s(min,max,moy,id_trajet);
     }
     if(a->diff>diff){
-        a->fg = ajouterAVLTrieParDistanceDiff(a->fg,min,max,moy,id_trajet);
+        a->fg = ajouterAVLtrier_s(a->fg,min,max,moy,id_trajet);
     }
     else if(a->diff<diff){
-        a->fd = ajouterAVLTrieParDistanceDiff(a->fd,min,max,moy,id_trajet);
+        a->fd = ajouterAVLtrier_s(a->fd,min,max,moy,id_trajet);
     }
     else{
         if(a->id_trajet>id_trajet){
-            a->fg = ajouterAVLTrieParDistanceDiff(a->fg,min,max,moy,id_trajet);
+            a->fg = ajouterAVLtrier_s(a->fg,min,max,moy,id_trajet);
         }
         else if(a->id_trajet<id_trajet){
-            a->fd = ajouterAVLTrieParDistanceDiff(a->fd,min,max,moy,id_trajet);
+            a->fd = ajouterAVLtrier_s(a->fd,min,max,moy,id_trajet);
         }
     }
     a->hauteur = 1 + maxi(hauteur(a->fg), hauteur(a->fd));
@@ -433,28 +433,28 @@ AVL* ajouterAVLTrieParDistanceDiff(AVL* a, float min, float max, float moy, int 
 }
 
 // Fonction pour copier les données du premier AVL dans un second et faire un nouveau tri
-AVL* copierEtTrierParDistanceDiff(AVL* ancienAVL, AVL* nouveauAVL) {
+AVL* copier_trier_s(AVL* ancienAVL, AVL* nouveauAVL) {
     if (ancienAVL != NULL) {
         // Copier les données dans le nouvel AVL
-        nouveauAVL = ajouterAVLTrieParDistanceDiff(nouveauAVL, ancienAVL->min, ancienAVL->max, ancienAVL->moy, ancienAVL->id_trajet);
+        nouveauAVL = ajouterAVLtrier_s(nouveauAVL, ancienAVL->min, ancienAVL->max, ancienAVL->moy, ancienAVL->id_trajet);
 
         // Appeler récursivement pour les sous-arbres
-        nouveauAVL = copierEtTrierParDistanceDiff(ancienAVL->fg, nouveauAVL);
-        nouveauAVL = copierEtTrierParDistanceDiff(ancienAVL->fd, nouveauAVL);
+        nouveauAVL = copier_trier_s(ancienAVL->fg, nouveauAVL);
+        nouveauAVL = copier_trier_s(ancienAVL->fd, nouveauAVL);
     }
     return nouveauAVL;
 }
 
 // Fonction pour afficher les 10 premiers éléments d'un AVL trié par différence de distances
-void afficher50Premiers(AVL* a, char* mode, FILE* fichierSortie, int* compteur) {
+void stockageDonnees_s(AVL* a, char* mode, FILE* fichierSortie, int* compteur) {
     if (a != NULL && *compteur < 50) {
-        afficher50Premiers(a->fd, mode, fichierSortie, compteur);
+        stockageDonnees_s(a->fd, mode, fichierSortie, compteur);
         if (*compteur >= 50) {
             return;
         }
         fprintf(fichierSortie, "%d;%d;%.3f;%.3f;%.3f;%.3f\n", *compteur+1, a->id_trajet, a->min, a->max, a->moy, a->diff);
         (*compteur)++;
-        afficher50Premiers(a->fg, mode, fichierSortie, compteur);
+        stockageDonnees_s(a->fg, mode, fichierSortie, compteur);
     }
 }
 
@@ -513,9 +513,9 @@ int main(int argc, char *argv[]){
                             strncpy(ville_arrivee, token, sizeof(ville_arrivee));
                             ville_arrivee[sizeof(ville_arrivee) - 1] = '\0';
                             //Ajout dans l'AVL de la ville de départ
-                            a = ajouterAVL(a, ville_depart, id_trajet, id_etape, "depart");
+                            a = ajouterAVL_t(a, ville_depart, id_trajet, id_etape, "depart");
                             //Ajout dans l'AVL de la ville d'arrivée
-                            a = ajouterAVL(a, ville_arrivee, id_trajet, id_etape, "arrivee");
+                            a = ajouterAVL_t(a, ville_arrivee, id_trajet, id_etape, "arrivee");
                         }
                     }
                 }
@@ -523,9 +523,9 @@ int main(int argc, char *argv[]){
         }
         printf("Tri en cours...\n");
         //Copie de l'AVL et nouveau trie
-        AVL* nouvelAVL = copierEtTrierParCompteurTotal(a, NULL);
+        AVL* nouvelAVL = copier_trier_t(a, NULL);
         //Stockage des données nécessaires dans le fichier de sortie
-        parcours(nouvelAVL,argv[3],fichierSortie);
+        tri_alphabetique(nouvelAVL,argv[3],fichierSortie);
         //Libération de la mémoire de l'AVL
         libererMemoire(a);
         //Fermeture des fichiers d'entrée et de sortie
@@ -567,7 +567,7 @@ int main(int argc, char *argv[]){
                                 if(sscanf(token, "%f", &distance) != 1){
                                     continue; // Passer à la ligne suivante
                                 }
-                                a = ajouterAVL2(a, distance, id_trajet);
+                                a = ajouterAVL_s(a, distance, id_trajet);
                             }
                         }
                     }
@@ -576,9 +576,9 @@ int main(int argc, char *argv[]){
         }
         printf("Tri en cours...\n");
         //Copie de l'AVL et nouveau trie
-        AVL* nouvelAVL = copierEtTrierParDistanceDiff(a, NULL);
+        AVL* nouvelAVL = copier_trier_s(a, NULL);
         //Stockage des données nécessaires dans le fichier de sortie
-        afficher50Premiers(nouvelAVL,argv[3],fichierSortie,&compteur);
+        stockageDonnees_s(nouvelAVL,argv[3],fichierSortie,&compteur);
         libererMemoire(a);
         //Fermeture des fichiers d'entrée et de sortie
         fclose(fichierEntree);
