@@ -486,6 +486,7 @@ int main(int argc, char *argv[]){
     if(strcmp(argv[2], "-t") == 0){
         char ligne[7000000];
         AVL* a=NULL;
+        printf("Récupération des données du fichier d'entrée en cours...\n");
         //Parcours du fichier d'entrée
         while(fgets(ligne,sizeof(ligne),fichierEntree)!=NULL){
             char ville_depart[100];
@@ -511,17 +512,16 @@ int main(int argc, char *argv[]){
                         if (token != NULL) {
                             strncpy(ville_arrivee, token, sizeof(ville_arrivee));
                             ville_arrivee[sizeof(ville_arrivee) - 1] = '\0';
-                            //Affichage de ce qui a été récupéré (FAUDRA L'ENLEVER)
-                            printf("%d %d %s %s\n", id_trajet, id_etape, ville_depart, ville_arrivee);
+                            //Ajout dans l'AVL de la ville de départ
+                            a = ajouterAVL(a, ville_depart, id_trajet, id_etape, "depart");
+                            //Ajout dans l'AVL de la ville d'arrivée
+                            a = ajouterAVL(a, ville_arrivee, id_trajet, id_etape, "arrivee");
                         }
                     }
                 }
             }
-            //Ajout dans l'AVL de la ville de départ
-            a = ajouterAVL(a, ville_depart, id_trajet, id_etape, "depart");
-            //Ajout dans l'AVL de la ville d'arrivée
-            a = ajouterAVL(a, ville_arrivee, id_trajet, id_etape, "arrivee");
         }
+        printf("Tri en cours...\n");
         //Copie de l'AVL et nouveau trie
         AVL* nouvelAVL = copierEtTrierParCompteurTotal(a, NULL);
         //Stockage des données nécessaires dans le fichier de sortie
