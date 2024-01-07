@@ -4,7 +4,7 @@ clean :
 	rm projet
 
 build :
-	gcc main.c -o projet
+	gcc main.c fonctionsAVL.c fonctionsT.c fonctionsS.c -o projet
 
 run :
 	./projet
