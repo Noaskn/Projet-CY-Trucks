@@ -73,8 +73,26 @@ case $traitement in
     LC_NUMERIC="C" awk -F';' '{distances[$1] += $5} END {for (i in distances) printf "%.6f;%d\n", distances[i], i}' $fichier_csv | sort -t';' -k1,1nr | head -n 10 | awk -F';' '{print $2";"$1}' | sort -t';' -k1,1nr > "$temp/traitement_l.txt"
     fin_temps=$(date +%s)
     duree=$((fin_temps - debut_temps))
-    echo "Temps d'exécution du traitement l : $duree secondes";;
-
+    echo "Temps d'exécution du traitement l : $duree secondes"
+    # Script Gnuplot pour générer le graphique du traitement -l
+    gnuplot << GPLOT
+    set terminal png
+    set output "$images/traitement_l.png"
+    set xlabel "ROUTE ID"
+    set ylabel "DISTANCE (Km)"
+    set title "Option -l : Distance = f(Route)"
+    set style data histograms
+    set style fill solid
+    set boxwidth 0.5
+    set datafile separator ";"
+    set yrange [0:*]  # La plage de l'axe des y commence à 0 et s'étend jusqu'à la valeur maximale
+    set ytics 500     # L'incrément sur l'axe des y est de 500
+    set xtics font "Arial,8"  # Taille de la police des marques sur l'axe x
+    set ytics font "Arial,8"  # Taille de la police des marques sur l'axe y
+    set key off       # Désactiver la légende
+    plot "./temp/traitement_l.txt" using 2:xtic(1) with boxes title "Distance"
+GPLOT
+   ;;
 -t)
     ./projet "$fichier_csv" -t "$temp/traitement_t.txt";;
 
