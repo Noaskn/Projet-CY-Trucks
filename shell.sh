@@ -94,7 +94,26 @@ case $traitement in
 GPLOT
    ;;
 -t)
-    ./projet "$fichier_csv" -t "$temp/traitement_t.txt";;
+    ./projet "$fichier_csv" -t "$temp/traitement_t.txt"
+    # Script Gnuplot pour générer le graphique du traitement -t
+    gnuplot << GPLOT
+    set terminal png
+    set output "$images/traitement_t.png"
+    set xlabel "TOWN NAMES"
+    set ylabel "NB ROUTES"
+    set title "Option -t : Nb routes = f(Towns)"
+    set style data histograms
+    set style fill solid border -1
+    set boxwidth 0.5
+    set datafile separator ";"
+    set yrange [0:*]
+    set ytics font "Arial,8"
+    set xtics font "Arial,8"
+    set xtics rotate by -45  # Incliner les étiquettes sur l'axe x de 45 degrés
+    set key font "Arial,8"  # Changer la taille de la légende
+    plot "./temp/traitement_t.txt" using 2:xtic(1) title "Total routes", '' using 3 title "First Town"
+GPLOT
+   ;;
 
 -s)
     ./projet "$fichier_csv" -s "$temp/traitement_s.txt";;
