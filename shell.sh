@@ -65,7 +65,29 @@ case $traitement in
     LC_NUMERIC="C" awk -F';' '{distances[$6]+=$5} END {for (i in distances) printf "%.6f;%s\n", distances[i], i}' $fichier_csv | sort -t';' -k1,1rn | head -n 10 | awk -F';' '{printf "%s;%s\n", $2, $1}' > "$temp/traitement_d2.txt"
     fin_temps=$(date +%s)
     duree=$((fin_temps - debut_temps))
-    echo "Temps d'exécution du traitement d2 : $duree secondes";;
+    echo "Temps d'exécution du traitement d2 : $duree secondes"
+    # Script Gnuplot pour générer le graphique du traitement -d2 (barres horizontales)
+    gnuplot << GPLOT
+    set terminal png
+    set output "$images/traitement_d2.png"
+    set xlabel "DRIVER NAMES"
+    set title "Option -d2 : Distance = f(Driver)"
+    set style data histograms
+    set style fill solid
+    set boxwidth 0.5
+    set datafile separator ";"
+    set yrange [0:*]
+    set ytics font "Arial,8"
+    set xtics font "Arial,8"
+    set key off
+    set y2range [0:*]
+    set y2tics 20000 nomirror font "Arial,8"
+    set y2label "DISTANCE (Km)"
+    plot "./temp/traitement_d2.txt" using 2:xticlabels(1) with boxes title "Distance"
+GPLOT
+    # Rotation de l'image avec convert
+    convert "$images/traitement_d2.png" -rotate 90 "$images/traitement_d2_rotated.png"
+    ;;
 
 #Traitement qui donne les 10 numéros d'identifiant des trajets qui ont la plus longue distance par ordre croissant avec affichage du temps d'exécution
 -l)
@@ -92,7 +114,8 @@ case $traitement in
     set key off       # Désactiver la légende
     plot "./temp/traitement_l.txt" using 2:xtic(1) with boxes title "Distance"
 GPLOT
-   ;;
+    ;;
+
 -t)
     ./projet "$fichier_csv" -t "$temp/traitement_t.txt"
     # Script Gnuplot pour générer le graphique du traitement -t
@@ -113,11 +136,32 @@ GPLOT
     set key font "Arial,8"  # Changer la taille de la légende
     plot "./temp/traitement_t.txt" using 2:xtic(1) title "Total routes", '' using 3 title "First Town"
 GPLOT
-   ;;
-
+    ;;
+    
 -s)
-    ./projet "$fichier_csv" -s "$temp/traitement_s.txt";;
-
+    ./projet "$fichier_csv" -s "$temp/traitement_s.txt"
+    # Script Gnuplot pour utiliser la différence min-max avec filledcurve et afficher toutes les valeurs de la colonne 2
+    gnuplot << GPLOT
+    set terminal png
+    set output "$images/traitement_s.png"
+    set xlabel "ROUTE ID"
+    set ylabel "DISTANCE (Km)"
+    set title "Option -s : Distance = f(Route)"
+    set style data lines
+    set boxwidth 0.5
+    set datafile separator ";"
+    set xrange [*:*]
+    set yrange [0:*]
+    set ytics font "Arial,8"
+    set xtics font "Arial,6"
+    set ytics 100
+    set xtics rotate by -45  # Incliner les étiquettes sur l'axe x de 45 degrés
+    set key font "Arial,8"  # Changer la taille de la légende
+    plot "./temp/traitement_s.txt" using 0:3:4:xticlabels(2) with filledcurves title "Distances Max/Min (Km)", \
+         '' using 0:5:xticlabels(2) with lines linestyle 5 title 'Distance average(Km)'
+GPLOT
+    ;;
+    
 *)
     echo "Le traitement saisi n'existe pas";;
     
