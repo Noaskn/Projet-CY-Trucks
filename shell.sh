@@ -106,13 +106,14 @@ GPLOT
     set style data histograms
     set style fill solid
     set boxwidth 0.5
+    SkyBlue = "#87CEEB"
     set datafile separator ";"
     set yrange [0:*]  # La plage de l'axe des y commence à 0 et s'étend jusqu'à la valeur maximale
     set ytics 500     # L'incrément sur l'axe des y est de 500
     set xtics font "Arial,8"  # Taille de la police des marques sur l'axe x
     set ytics font "Arial,8"  # Taille de la police des marques sur l'axe y
     set key off       # Désactiver la légende
-    plot "./temp/traitement_l.txt" using 2:xtic(1) with boxes title "Distance"
+    plot "./temp/traitement_l.txt" using 2:xtic(1) with boxes lc rgb SkyBlue title "Distance"
 GPLOT
     ;;
 
@@ -128,13 +129,15 @@ GPLOT
     set style data histograms
     set style fill solid border -1
     set boxwidth 0.5
+    SkyBlue = "#87CEEB"
+    DarkBlue = "#00008B"
     set datafile separator ";"
     set yrange [0:*]
     set ytics font "Arial,8"
     set xtics font "Arial,8"
     set xtics rotate by -45  # Incliner les étiquettes sur l'axe x de 45 degrés
     set key font "Arial,8"  # Changer la taille de la légende
-    plot "./temp/traitement_t.txt" using 2:xtic(1) title "Total routes", '' using 3 title "First Town"
+    plot "./temp/traitement_t.txt" using 2:xtic(1) lc rgb SkyBlue title "Total routes", '' using 3 lc rgb DarkBlue title "First Town"
 GPLOT
     ;;
     
@@ -149,6 +152,8 @@ GPLOT
     set title "Option -s : Distance = f(Route)"
     set style data lines
     set boxwidth 0.5
+    SkyBlue = "#87CEEB"
+    DarkBlue = "#00008B"
     set datafile separator ";"
     set xrange [*:*]
     set yrange [0:*]
@@ -157,8 +162,8 @@ GPLOT
     set ytics 100
     set xtics rotate by -45  # Incliner les étiquettes sur l'axe x de 45 degrés
     set key font "Arial,8"  # Changer la taille de la légende
-    plot "./temp/traitement_s.txt" using 0:3:4:xticlabels(2) with filledcurves title "Distances Max/Min (Km)", \
-         '' using 0:5:xticlabels(2) with lines linestyle 5 title 'Distance average(Km)'
+    plot "./temp/traitement_s.txt" using 0:3:4:xticlabels(2) with filledcurves fc rgb SkyBlue title "Distances Max/Min (Km)", \
+         '' using 0:5:xticlabels(2) with lines linestyle 5 lc rgb DarkBlue title 'Distance average(Km)'
 GPLOT
     ;;
     
