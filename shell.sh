@@ -140,8 +140,7 @@ GPLOT
     
 -s)
     ./projet "$fichier_csv" -s "$temp/traitement_s.txt"
-    # Script Gnuplot pour utiliser la différence min-max avec filledcurve et afficher toutes les valeurs de la colonne 2
-    gnuplot << GPLOT
+    # Script Gnuplot pour générer le graphique du traitement -s
     set terminal png
     set output "$images/traitement_s.png"
     set xlabel "ROUTE ID"
