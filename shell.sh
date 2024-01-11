@@ -141,6 +141,7 @@ GPLOT
 -s)
     ./projet "$fichier_csv" -s "$temp/traitement_s.txt"
     # Script Gnuplot pour générer le graphique du traitement -s
+    gnuplot << GPLOT
     set terminal png
     set output "$images/traitement_s.png"
     set xlabel "ROUTE ID"
