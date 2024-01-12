@@ -18,7 +18,7 @@ int equilibre(AVL* a){
 
 //Fonction pour obtenir le maximum de deux entiers
 int maxi(int a, int b){
-    return (a > b ? b : a);
+    return (a > b ? a : b);
 }
 
 //Fonction pour faire une rotation simple à fg
