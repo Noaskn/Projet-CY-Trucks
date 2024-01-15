@@ -6,6 +6,7 @@ fichier_csv="$1"
 #Nom de l'exécutable C
 executable="projet"
 
+#Choix du traitement par l'utilisateur
 read -p "Choisir un traitement (-d1,-d2,-l,-t,-s,-h) : " traitement
 
 #Vérification de la présence de l'exécutable
@@ -51,22 +52,22 @@ case $traitement in
 -h)
     cat help.txt;;
 
-#Traitement qui donne les 10 conducteurs avec le plus de trajets par ordre décroissant avec affichage du temps d'exécution
+#Trie en shell pour le traitement -d1
 -d1)
     debut_temps=$(date +%s)
     awk -F';' '!seen[$6,$1]++ {print $6}' $fichier_csv | sort | uniq -c | sort -k1,1nr | head -n 10 > "$temp/traitement_d1.txt"
     fin_temps=$(date +%s)
-    duree=$((fin_temps - debut_temps))
+    duree=$((fin_temps - debut_temps)) #Calcul de la durée du traitement
     echo "Temps d'exécution du traitement d1 : $duree secondes";;
 
-#Traitement qui donne les 10 conducteurs qui ont la plus longue distance par ordre décroissant avec affichage du temps d'exécution
+#Trie en shell pour le traitement -d2
 -d2)
     debut_temps=$(date +%s)
     LC_NUMERIC="C" awk -F';' '{distances[$6]+=$5} END {for (i in distances) printf "%.6f;%s\n", distances[i], i}' $fichier_csv | sort -t';' -k1,1rn | head -n 10 | awk -F';' '{printf "%s;%s\n", $2, $1}' > "$temp/traitement_d2.txt"
     fin_temps=$(date +%s)
-    duree=$((fin_temps - debut_temps))
+    duree=$((fin_temps - debut_temps)) #Calcul de la durée du traitement
     echo "Temps d'exécution du traitement d2 : $duree secondes"
-    # Script Gnuplot pour générer le graphique du traitement -d2 (barres horizontales)
+    # Script Gnuplot pour générer le graphique du traitement -d2
     gnuplot << GPLOT
     set terminal png
     set output "$images/traitement_d2.png"
@@ -89,12 +90,12 @@ GPLOT
     convert "$images/traitement_d2.png" -rotate 90 "$images/traitement_d2_rotated.png"
     ;;
 
-#Traitement qui donne les 10 numéros d'identifiant des trajets qui ont la plus longue distance par ordre croissant avec affichage du temps d'exécution
+#Trie en shell pour le traitement -l
 -l)
     debut_temps=$(date +%s)
     LC_NUMERIC="C" awk -F';' '{distances[$1] += $5} END {for (i in distances) printf "%.6f;%d\n", distances[i], i}' $fichier_csv | sort -t';' -k1,1nr | head -n 10 | awk -F';' '{print $2";"$1}' | sort -t';' -k1,1nr > "$temp/traitement_l.txt"
     fin_temps=$(date +%s)
-    duree=$((fin_temps - debut_temps))
+    duree=$((fin_temps - debut_temps)) #Calcul de la durée du traitement
     echo "Temps d'exécution du traitement l : $duree secondes"
     # Script Gnuplot pour générer le graphique du traitement -l
     gnuplot << GPLOT
@@ -117,6 +118,7 @@ GPLOT
 GPLOT
     ;;
 
+#Trie en C pour traitement -t
 -t)
     ./projet "$fichier_csv" -t "$temp/traitement_t.txt"
     # Script Gnuplot pour générer le graphique du traitement -t
@@ -141,6 +143,7 @@ GPLOT
 GPLOT
     ;;
     
+#Trie en C pour traitement -s
 -s)
     ./projet "$fichier_csv" -s "$temp/traitement_s.txt"
     # Script Gnuplot pour générer le graphique du traitement -s
@@ -166,7 +169,8 @@ GPLOT
          '' using 0:5:xticlabels(2) with lines linestyle 5 lc rgb DarkBlue title 'Distance average(Km)'
 GPLOT
     ;;
-    
+
+#Par défaut
 *)
     echo "Le traitement saisi n'existe pas";;
     
