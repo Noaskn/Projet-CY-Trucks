@@ -28,8 +28,8 @@ typedef struct AVL{
 int hauteur(AVL* a);
 int equilibre(AVL* a);
 int maxi(int a, int b);
-AVL* rotationGauche(AVL *y);
-AVL* rotationDroite(AVL *x);
+AVL* rotationGauche(AVL* y);
+AVL* rotationDroite(AVL* x);
 void libererMemoire(AVL* a);
 
 #endif
