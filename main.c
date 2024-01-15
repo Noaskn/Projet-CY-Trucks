@@ -6,7 +6,7 @@
 #include <string.h>
 
 int main(int argc, char *argv[]){
-    //Vérification du villebre d'arguments
+    //Vérification du nombre d'arguments
     if(argc!=4){
         fprintf(stderr, "Usage : %s %s %s %s\n", argv[0], argv[1], argv[2], argv[3]);
         return 1;
@@ -35,12 +35,12 @@ int main(int argc, char *argv[]){
             //Récupération des données nécessaires au traitement
             if(token != NULL){
                 if(sscanf(token, "%d", &id_trajet) != 1){
-                    continue; // Passer à la ligne suivante
+                    continue;
                 }
                 token = strtok(NULL, ";");
                 if(token != NULL){
                     if(sscanf(token, "%d", &id_etape) != 1){
-                        continue; // Passer à la ligne suivante
+                        continue;
                     }
                     token = strtok(NULL, ";");
                     if(token != NULL){
@@ -76,6 +76,7 @@ int main(int argc, char *argv[]){
         AVL* a=NULL;
         int compteur=0;
         printf("Récupération des données du fichier d'entrée en cours...\n");
+        //Parcours du fichier d'entrée
         while(fgets(ligne,sizeof(ligne),fichierEntree)!=NULL){
             int id_trajet;
             int id_etape;
@@ -83,14 +84,15 @@ int main(int argc, char *argv[]){
             char ville_arrivee[100];
             float distance;
             char *token = strtok(ligne, ";");
+            //Récupération des données nécessaires au traitement
             if(token != NULL) {
                 if(sscanf(token, "%d", &id_trajet) != 1){
-                    continue; // Passer à la ligne suivante
+                    continue;
                 }
                 token = strtok(NULL, ";");
                 if(token != NULL){
                     if(sscanf(token, "%d", &id_etape) != 1){
-                        continue; // Passer à la ligne suivante
+                        continue;
                     }
                     token = strtok(NULL, ";");
                     if(token != NULL){
@@ -103,7 +105,7 @@ int main(int argc, char *argv[]){
                             token = strtok(NULL, ";");
                             if(token != NULL){
                                 if(sscanf(token, "%f", &distance) != 1){
-                                    continue; // Passer à la ligne suivante
+                                    continue;
                                 }
                                 a = ajouterAVL_s(a, distance, id_trajet);
                             }
@@ -122,6 +124,5 @@ int main(int argc, char *argv[]){
         fclose(fichierEntree);
         fclose(fichierSortie);
     }
-    
     return 0;
 }
