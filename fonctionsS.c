@@ -4,7 +4,10 @@
 //Fonction pour créer un nouveau nœud
 AVL* creerAVL_s(int id_trajet, float distance){
     AVL* nouveau = (AVL*)malloc(sizeof(AVL));
-    if(nouveau != NULL){
+    if(nouveau == NULL){
+        exit(1);
+    }
+    else{
         nouveau->id_trajet = id_trajet;
         nouveau->distance = distance;
         nouveau->min = distance;
@@ -31,6 +34,9 @@ AVL* creerAVL_s(int id_trajet, float distance){
 
 //Fonction qui fait la moyenne des valeurs dans un tableau
 float moyenne(AVL* a){
+    if(a == NULL){
+        exit(1);
+    }
     float res = 0;
     for(int i=0;i<a->compteur_distance;i++){
         res += a->tab_distance[i];
@@ -102,7 +108,10 @@ AVL* ajouterAVL_s(AVL* a, float distance, int id_trajet){
 //Fonction pour créer un nouveau nœud
 AVL* creerAVLtrier_s(float min, float max, float moy, int id_trajet){
     AVL* nouveau = (AVL*)malloc(sizeof(AVL));
-    if(nouveau != NULL){
+    if(nouveau == NULL){
+        exit(1);
+    }
+    else{
         nouveau->min = min;
         nouveau->max = max;
         nouveau->moy = moy;
