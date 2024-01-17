@@ -23,6 +23,9 @@ int maxi(int a, int b){
 
 //Fonction pour faire une rotation simple à gauche
 AVL* rotationGauche(AVL* y){
+    if(y == NULL){
+        exit(1);
+    }
     AVL* x = y->fd;
     AVL* T2 = x->fg;
     x->fg = y;
@@ -34,6 +37,9 @@ AVL* rotationGauche(AVL* y){
 
 //Fonction pour faire une rotation simple à droite
 AVL* rotationDroite(AVL* x){
+    if(x == NULL){
+        exit(1);
+    }
     AVL* y = x->fg;
     AVL* T2 = y->fd;
     y->fd = x;
