@@ -4,7 +4,10 @@
 //Fonction pour créer un nouveau nœud
 AVL* creerAVL_t(int id_trajet, int id_etape, char ville[], char type[]){
     AVL* nouveau = (AVL*)malloc(sizeof(AVL));
-    if(nouveau != NULL){
+    if(nouveau == NULL){
+        exit(1);
+    }
+    else{
         nouveau->id_trajet = id_trajet;
         nouveau->id_etape = id_etape;
         strcpy(nouveau->ville, ville);
@@ -109,7 +112,10 @@ AVL* ajouterAVL_t(AVL* a, char ville[],int id_trajet, int id_etape, char type[])
 //Fonction pour créer un nouveau nœud
 AVL* creerAVLtrier_t(char ville[], int compteur_total, int compteur_depart){
     AVL* nouveau = (AVL*)malloc(sizeof(AVL));
-    if(nouveau!=NULL){
+    if(nouveau == NULL){
+        exit(1);
+    }
+    else{
         strcpy(nouveau->ville, ville);
         nouveau->compteur_total = compteur_total;
         nouveau->compteur_depart = compteur_depart;
@@ -204,6 +210,9 @@ void stockageDonnees_t(AVL* a, char* mode, FILE* fichierSortie, int* compteur, A
 
 //Fonction qui trie les données du fichier de sortie dans l'ordre alphabétique
 void tri_alphabetique(AVL* a, char* mode, FILE* fichierSortie){
+    if(a == NULL){
+        exit(1);
+    }
     int compteur = 0;  // Initialiser le compteur
     AVL* tab_id[10];  // tableau pour stocker les 10 villes
     stockageDonnees_t(a, mode, fichierSortie, &compteur, tab_id);
