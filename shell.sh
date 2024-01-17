@@ -55,10 +55,37 @@ case $traitement in
 #Trie en shell pour le traitement -d1
 -d1)
     debut_temps=$(date +%s)
-    awk -F';' '!seen[$6,$1]++ {print $6}' $fichier_csv | sort | uniq -c | sort -k1,1nr | head -n 10 > "$temp/traitement_d1.txt"
+    awk -F';' '!seen[$6,$1]++ {print $6}' $fichier_csv | sort | uniq -c | sort -k1,1nr | head -n 10 | awk '{print $2" "$3";"$1}' > "$temp/traitement_d1.txt"
     fin_temps=$(date +%s)
     duree=$((fin_temps - debut_temps)) #Calcul de la durée du traitement
-    echo "Temps d'exécution du traitement d1 : $duree secondes";;
+    echo "Temps d'exécution du traitement d1 : $duree secondes"
+    # Script Gnuplot pour générer le graphique du traitement -d1
+    gnuplot << GPLOT
+    set terminal png
+    set output "$images/traitement_d1.png"
+    set xlabel "DRIVER NAMES" rotate by 180 font "Arial,7" offset 0,-4
+    set y2label "NB ROUTES" font "Arial,7" offset -2,0
+    set ylabel "Option -d1 : Nb routes = f(Driver)" font "Arial,8" offset 1,0
+    set style fill solid
+    set boxwidth 0.5 absolute
+    SkyBlue = "#87CEEB"
+    set xrange [0.5:*]
+    set yrange [0:250]  # Définir une plage appropriée pour l'axe y
+    set y2range [0:250]
+    set y2tics 50    # L'incrément sur l'axe des y est de 50
+    set xtics nomirror rotate by 90 font "Arial,7" offset 0,-5.5
+    set y2tics nomirror rotate by 90 font "Arial,7" offset 0,-1
+    set origin 0,-0.01
+    set format y ""
+    set format x ""
+    set key off
+    set style data impulses
+    set datafile separator ";"
+    plot "./temp/traitement_d1.txt" using 2:xticlabels(1) with boxes lc rgb SkyBlue notitle axes x1y2
+GPLOT
+    # Rotation de l'image avec convert
+    convert "$images/traitement_d1.png" -rotate 90 "$images/traitement_d1_rotated.png"
+    ;;
 
 #Trie en shell pour le traitement -d2
 -d2)
@@ -71,20 +98,25 @@ case $traitement in
     gnuplot << GPLOT
     set terminal png
     set output "$images/traitement_d2.png"
-    set xlabel "DRIVER NAMES"
-    set title "Option -d2 : Distance = f(Driver)"
-    set style data histograms
+    set xlabel "DRIVER NAMES" rotate by 180 font "Arial,7" offset 0,-4
+    set y2label "DISTANCE (km)" font "Arial,7" offset -2,0
+    set ylabel "Option -d2 : Distance = f(Driver)" font "Arial,8" offset 1,0
     set style fill solid
-    set boxwidth 0.5
-    set datafile separator ";"
-    set yrange [0:*]
-    set ytics font "Arial,8"
-    set xtics font "Arial,8"
+    set boxwidth 0.5 absolute
+    SkyBlue = "#87CEEB"
+    set xrange [0.5:*]
+    set yrange [0:160000]  # Définir une plage appropriée pour l'axe y
+    set y2range [0:160000]
+    set y2tics 20000    # L'incrément sur l'axe des y est de 20000
+    set xtics nomirror rotate by 90 font "Arial,7" offset 0,-5.5
+    set y2tics nomirror rotate by 90 font "Arial,7" offset 0,-1
+    set origin 0,-0.01
+    set format y ""
+    set format x ""
     set key off
-    set y2range [0:*]
-    set y2tics 20000 nomirror font "Arial,8"
-    set y2label "DISTANCE (Km)"
-    plot "./temp/traitement_d2.txt" using 2:xticlabels(1) with boxes title "Distance"
+    set style data impulses
+    set datafile separator ";"
+    plot "./temp/traitement_d2.txt" using 2:xticlabels(1) with boxes lc rgb SkyBlue title "Distance" axes x1y2
 GPLOT
     # Rotation de l'image avec convert
     convert "$images/traitement_d2.png" -rotate 90 "$images/traitement_d2_rotated.png"
@@ -101,9 +133,9 @@ GPLOT
     gnuplot << GPLOT
     set terminal png
     set output "$images/traitement_l.png"
-    set xlabel "ROUTE ID"
-    set ylabel "DISTANCE (Km)"
-    set title "Option -l : Distance = f(Route)"
+    set xlabel "ROUTE ID" font "Arial,7"
+    set ylabel "DISTANCE (Km)" font "Arial,7"
+    set title "Option -l : Distance = f(Route)" font "Arial,8"
     set style data histograms
     set style fill solid
     set boxwidth 0.5
@@ -111,8 +143,8 @@ GPLOT
     set datafile separator ";"
     set yrange [0:*]  # La plage de l'axe des y commence à 0 et s'étend jusqu'à la valeur maximale
     set ytics 500     # L'incrément sur l'axe des y est de 500
-    set xtics font "Arial,8"  # Taille de la police des marques sur l'axe x
-    set ytics font "Arial,8"  # Taille de la police des marques sur l'axe y
+    set xtics font "Arial,7"  # Taille de la police des marques sur l'axe x
+    set ytics font "Arial,7"  # Taille de la police des marques sur l'axe y
     set key off       # Désactiver la légende
     plot "./temp/traitement_l.txt" using 2:xtic(1) with boxes lc rgb SkyBlue title "Distance"
 GPLOT
@@ -125,9 +157,9 @@ GPLOT
     gnuplot << GPLOT
     set terminal png
     set output "$images/traitement_t.png"
-    set xlabel "TOWN NAMES"
-    set ylabel "NB ROUTES"
-    set title "Option -t : Nb routes = f(Towns)"
+    set xlabel "TOWN NAMES" font "Arial,7"
+    set ylabel "NB ROUTES" font "Arial,7"
+    set title "Option -t : Nb routes = f(Towns)" font "Arial,8"
     set style data histograms
     set style fill solid border -1
     set boxwidth 0.5
@@ -135,8 +167,8 @@ GPLOT
     DarkBlue = "#00008B"
     set datafile separator ";"
     set yrange [0:*]
-    set ytics font "Arial,8"
-    set xtics font "Arial,8"
+    set ytics font "Arial,7"
+    set xtics font "Arial,7"
     set xtics rotate by -45  # Incliner les étiquettes sur l'axe x de 45 degrés
     set key font "Arial,8"  # Changer la taille de la légende
     plot "./temp/traitement_t.txt" using 2:xtic(1) lc rgb SkyBlue title "Total routes", '' using 3 lc rgb DarkBlue title "First Town"
@@ -150,9 +182,9 @@ GPLOT
     gnuplot << GPLOT
     set terminal png
     set output "$images/traitement_s.png"
-    set xlabel "ROUTE ID"
-    set ylabel "DISTANCE (Km)"
-    set title "Option -s : Distance = f(Route)"
+    set xlabel "ROUTE ID" font "Arial,7"
+    set ylabel "DISTANCE (Km)" font "Arial,7"
+    set title "Option -s : Distance = f(Route)" font "Arial,8"
     set style data lines
     set boxwidth 0.5
     SkyBlue = "#87CEEB"
@@ -160,7 +192,7 @@ GPLOT
     set datafile separator ";"
     set xrange [*:*]
     set yrange [0:*]
-    set ytics font "Arial,8"
+    set ytics font "Arial,7"
     set xtics font "Arial,6"
     set ytics 100
     set xtics rotate by -45  # Incliner les étiquettes sur l'axe x de 45 degrés
