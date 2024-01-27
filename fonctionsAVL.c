@@ -1,52 +1,94 @@
 #include "fonctionsAVL.h"
 
-//Fonction pour calculer la hauteur d'un nœud
-int hauteur(AVL* a){
-    if(a == NULL){
-        return 0;
+int maxi(int a,int b){
+    if(a>b){
+        return a;
     }
-    return a->hauteur;
-}
-
-//Fonction pour calculer l'équilibre d'un nœud
-int equilibre(AVL* a){
-    if(a == NULL){
-        return 0;
+    else{
+        return b;
     }
-    return hauteur(a->fg) - hauteur(a->fd);
 }
 
-//Fonction pour obtenir le maximum de deux entiers
-int maxi(int a, int b){
-    return (a > b ? b : a);
+int mini(int a,int b){
+    if(a>b){
+        return b;
+    }
+    else{
+        return a;
+    }
 }
 
-//Fonction pour faire une rotation simple à gauche
-AVL* rotationGauche(AVL* y){
-    if(y == NULL){
+AVL* rotationGauche(AVL* a){
+    if(a==NULL){
         exit(1);
     }
-    AVL* x = y->fd;
-    AVL* T2 = x->fg;
-    x->fg = y;
-    y->fd = T2;
-    y->hauteur = 1 + maxi(hauteur(y->fg), hauteur(y->fd));
-    x->hauteur = 1 + maxi(hauteur(x->fg), hauteur(x->fd));
-    return x;
+    AVL* pivot;
+    int eq_a,eq_p;
+    pivot=a->fd;
+    a->fd=pivot->fg;
+    pivot->fg=a;
+    eq_a=a->equilibre;
+    eq_p=pivot->equilibre;
+    a->equilibre=eq_a-maxi(eq_p,0)-1;
+    pivot->equilibre=mini(mini(eq_a-2,eq_a+eq_p-2),eq_p-1);
+    a=pivot;
+    return a;
 }
 
-//Fonction pour faire une rotation simple à droite
-AVL* rotationDroite(AVL* x){
-    if(x == NULL){
+AVL* rotationDroite(AVL* a){
+    if(a==NULL){
         exit(1);
     }
-    AVL* y = x->fg;
-    AVL* T2 = y->fd;
-    y->fd = x;
-    x->fg = T2;
-    x->hauteur = 1 + maxi(hauteur(x->fg), hauteur(x->fd));
-    y->hauteur = 1 + maxi(hauteur(y->fg), hauteur(y->fd));
-    return y;
+    AVL* pivot;
+    int eq_a,eq_p;
+    pivot=a->fg;
+    a->fg=pivot->fd;
+    pivot->fd=a;
+    eq_a=a->equilibre;
+    eq_p=pivot->equilibre;
+    a->equilibre=eq_a-mini(eq_p,0)+1;
+    pivot->equilibre=maxi(maxi(eq_a+2,eq_a+eq_p+2),eq_p+1);
+    a=pivot;
+    return a;
+}
+
+AVL* doubleRotationGauche(AVL* a){
+    if(a==NULL){
+        exit(1);
+    }
+    a->fd=rotationDroite(a->fd);
+    return rotationGauche(a);
+}
+
+AVL* doubleRotationDroite(AVL* a){
+    if(a==NULL){
+        exit(1);
+    }
+    a->fg=rotationGauche(a->fg);
+    return rotationDroite(a);
+}
+
+AVL* equilibrerAVL(AVL* a){
+    if(a==NULL){
+        exit(1);
+    }
+    if(a->equilibre>=2){
+        if(a->fd->equilibre>=0){
+            return rotationGauche(a);
+        }
+        else{
+            return doubleRotationGauche(a);
+        }
+    }
+    else if(a->equilibre<=-2){
+        if(a->fg->equilibre<=0){
+            return rotationDroite(a);
+        }
+        else{
+            return doubleRotationDroite(a);
+        }
+    }
+    return a;
 }
 
 //Fonction qui libère la mémoire de l'AVL
