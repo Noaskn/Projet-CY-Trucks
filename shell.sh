@@ -2,12 +2,10 @@
 
 #Nom des arguments
 fichier_csv="$1"
+traitement="$2"
 
 #Nom de l'exécutable C
 executable="projet"
-
-#Choix du traitement par l'utilisateur
-read -p "Choisir un traitement (-d1,-d2,-l,-t,-s,-h) : " traitement
 
 #Vérification de la présence de l'exécutable
 if [ ! -x "$executable" ]; then
