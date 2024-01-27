@@ -1,13 +1,21 @@
+# Répertoires
+DOSSIER_DATA = data
+DOSSIER_C = progc
+
+# Fichiers
+FICHIER_DATA = $(DOSSIER_DATA)/data.csv
+FICHIER_PROJET = $(DOSSIER_C)/projet
+
 all: script
 
 clean:
-	rm projet
+	rm $(FICHIER_PROJET)
 
 build:
-	gcc main.c fonctionsAVL.c fonctionsT.c fonctionsS.c -o projet
+	gcc $(DOSSIER_C)/main.c $(DOSSIER_C)/fonctionsAVL.c $(DOSSIER_C)/fonctionsT.c $(DOSSIER_C)/fonctionsS.c -o $(FICHIER_PROJET)
 
 run:
-	./projet
+	./$(FICHIER_PROJET)
 
 script:
-	sh shell.sh data.csv $(ARG)
+	sh shell.sh $(FICHIER_DATA) $(ARG)
