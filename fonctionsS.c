@@ -22,12 +22,11 @@ AVL* creerAVL_s(int id_trajet, float distance){
         }
         else{
             //Gestion de l'erreur d'allocation mémoire
-            free(nouveau);
-            return NULL;
+            exit(1);
         }
         nouveau->fg = NULL;
         nouveau->fd = NULL;
-        nouveau->hauteur = 1;
+        nouveau->equilibre = 0;
     }
     return nouveau;
 }
@@ -45,13 +44,15 @@ float moyenne(AVL* a){
 }
 
 //Fonction pour ajouter un identifiant de trajet dans l'AVL
-AVL* ajouterAVL_s(AVL* a, float distance, int id_trajet){
+AVL* ajouterAVL_s(AVL* a, float distance, int id_trajet, int* h){
     //AVL vide donc on crée directement le nœud
     if(a == NULL){
-        return creerAVL_s(id_trajet, distance);
+        *h = 1;
+        a = creerAVL_s(id_trajet, distance);
     }
     //L'identifiant de trajet a été trouvé dans l'AVL
     if(a->id_trajet == id_trajet){
+        *h = 0;
         //Mise à jour du compteur de distance car on va en ajouter une
         a->compteur_distance++;
         //Réallocation du tableau avec une taille augmentée
@@ -75,32 +76,22 @@ AVL* ajouterAVL_s(AVL* a, float distance, int id_trajet){
     }
     //Ajout de l'identifiant de trajet dans le sous arbre de gauche
     else if(id_trajet<a->id_trajet){
-        a->fg = ajouterAVL_s(a->fg,distance,id_trajet);
+        a->fg = ajouterAVL_s(a->fg,distance,id_trajet,h);
+        *h = -*h;
     }
     //Ajout de l'identifiant de trajet dans le sous arbre de droite
     else{
-        a->fd = ajouterAVL_s(a->fd,distance,id_trajet);
+        a->fd = ajouterAVL_s(a->fd,distance,id_trajet,h);
     }
-    //Mise à jour de la hauteur et de l'équilibre
-    a->hauteur = 1 + maxi(hauteur(a->fg), hauteur(a->fd));
-    int eq = equilibre(a);
-    //Cas de l'équilibre à gauche-gauche
-    if(eq > 1 && id_trajet < a->fg->id_trajet){
-        return rotationDroite(a);
-    }
-    //Cas de l'équilibre à droite-droite
-    if(eq < -1 && id_trajet > a->fd->id_trajet){
-        return rotationGauche(a);
-    }
-    //Cas de l'équilibre à gauche-droite
-    if(eq > 1 && id_trajet > a->fg->id_trajet){
-        a->fg = rotationGauche(a->fg);
-        return rotationDroite(a);
-    }
-    //Cas de l'équilibre à droite-gauche
-    if(eq < -1 && id_trajet < a->fd->id_trajet){
-        a->fd = rotationDroite(a->fd);
-        return rotationGauche(a);
+    if(*h != 0){
+        a->equilibre = a->equilibre + *h;
+        a=equilibrerAVL(a);
+        if(a->equilibre == 0){
+            *h = 0;
+        }
+        else{
+            *h = 1;
+        }
     }
     return a;
 }
@@ -119,71 +110,70 @@ AVL* creerAVLtrier_s(float min, float max, float moy, int id_trajet){
         nouveau->id_trajet = id_trajet;
         nouveau->fg = NULL;
         nouveau->fd = NULL;
-        nouveau->hauteur = 1;
+        nouveau->equilibre = 0;
     }
     return nouveau;
 }
 
 //Fonction pour ajouter une nouvelle différence de distance dans l'AVL
-AVL* ajouterAVLtrier_s(AVL* a, float min, float max, float moy, int id_trajet){
+AVL* ajouterAVLtrier_s(AVL* a, float min, float max, float moy, int id_trajet, int* h){
     float diff=max-min;
     //AVL vide donc on crée directement le nœud
     if(a == NULL){
-        return creerAVLtrier_s(min,max,moy,id_trajet);
+        *h = 1;
+        a = creerAVLtrier_s(min,max,moy,id_trajet);
     }
     //Ajout de la différence dans le sous arbre de gauche
     if(a->diff>diff){
-        a->fg = ajouterAVLtrier_s(a->fg,min,max,moy,id_trajet);
+        a->fg = ajouterAVLtrier_s(a->fg,min,max,moy,id_trajet,h);
+        *h = -*h;
     }
     //Ajout de la différence dans le sous arbre de droite
     else if(a->diff<diff){
-        a->fd = ajouterAVLtrier_s(a->fd,min,max,moy,id_trajet);
+        a->fd = ajouterAVLtrier_s(a->fd,min,max,moy,id_trajet,h);
     }
     //La différence existe déjà donc on trie par identifiant de trajet
     else{
         //Ajout de la différence dans le sous arbre de gauche
         if(a->id_trajet>id_trajet){
-            a->fg = ajouterAVLtrier_s(a->fg,min,max,moy,id_trajet);
+            a->fg = ajouterAVLtrier_s(a->fg,min,max,moy,id_trajet,h);
+            *h = -*h;
         }
         //Ajout de la différence dans le sous arbre de droite
         else if(a->id_trajet<id_trajet){
-            a->fd = ajouterAVLtrier_s(a->fd,min,max,moy,id_trajet);
+            a->fd = ajouterAVLtrier_s(a->fd,min,max,moy,id_trajet,h);
+        }
+        else{
+            *h = 0;
+            return a;
         }
     }
-    //Mise à jour de la hauteur et de l'équilibre
-    a->hauteur = 1 + maxi(hauteur(a->fg), hauteur(a->fd));
-    int eq = equilibre(a);
-    //Cas de l'équilibre à gauche-gauche
-    if(eq > 1 && diff < a->fg->diff){
-        return rotationDroite(a);
-    }
-    //Cas de l'équilibre à droite-droite
-    if(eq < -1 && diff > a->fd->diff){
-        return rotationGauche(a);
-    }
-    //Cas de l'équilibre à gauche-droite
-    if(eq > 1 && diff > a->fg->diff){
-        a->fg = rotationGauche(a->fg);
-        return rotationDroite(a);
-    }
-    //Cas de l'équilibre à droite-gauche
-    if (eq < -1 && diff < a->fd->diff) {
-        a->fd = rotationDroite(a->fd);
-        return rotationGauche(a);
+    if(*h != 0){
+        a->equilibre = a->equilibre + *h;
+        a=equilibrerAVL(a);
+        if(a->equilibre == 0){
+            *h = 0;
+        }
+        else{
+            *h = 1;
+        }
     }
     return a;
 }
 
 //Fonction pour copier les données du premier AVL dans un second et faire un nouveau tri
-AVL* copier_trier_s(AVL* ancienAVL, AVL* nouveauAVL){
+AVL* copier_trier_s(AVL* ancienAVL, AVL** nouvelAVL, int* h){
     if(ancienAVL != NULL){
-        //Copier les données dans le nouvel AVL
-        nouveauAVL = ajouterAVLtrier_s(nouveauAVL, ancienAVL->min, ancienAVL->max, ancienAVL->moy, ancienAVL->id_trajet);
+        *nouvelAVL = ajouterAVLtrier_s(*nouvelAVL, ancienAVL->min, ancienAVL->max, ancienAVL->moy, ancienAVL->id_trajet, h);
         //Appeler récursivement les sous-arbres
-        nouveauAVL = copier_trier_s(ancienAVL->fg, nouveauAVL);
-        nouveauAVL = copier_trier_s(ancienAVL->fd, nouveauAVL);
+        if(ancienAVL->fg != NULL){
+            copier_trier_s(ancienAVL->fg, nouvelAVL, h);
+        }
+        if(ancienAVL->fd != NULL){
+            copier_trier_s(ancienAVL->fd, nouvelAVL, h);
+        }
     }
-    return nouveauAVL;
+    return *nouvelAVL;
 }
 
 //Fonction pour stocker dans le fichier de sortie les 50 plus grandes différences de distances max-min
