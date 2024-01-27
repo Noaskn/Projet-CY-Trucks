@@ -24,6 +24,7 @@ int main(int argc, char *argv[]){
     if(strcmp(argv[2], "-t") == 0){
         char ligne[7000000];
         AVL* a=NULL;
+        int h = 0;
         printf("Récupération des données du fichier d'entrée en cours...\n");
         //Parcours du fichier d'entrée
         while(fgets(ligne,sizeof(ligne),fichierEntree)!=NULL){
@@ -51,17 +52,19 @@ int main(int argc, char *argv[]){
                             strncpy(ville_arrivee, token, sizeof(ville_arrivee));
                             ville_arrivee[sizeof(ville_arrivee) - 1] = '\0';
                             //Ajout dans l'AVL de la ville de départ
-                            a = ajouterAVL_t(a, ville_depart, id_trajet, id_etape, "depart");
+                            a = ajouterAVL_t(a, ville_depart, id_trajet, id_etape, "depart", &h);
                             //Ajout dans l'AVL de la ville d'arrivée
-                            a = ajouterAVL_t(a, ville_arrivee, id_trajet, id_etape, "arrivee");
+                            a = ajouterAVL_t(a, ville_arrivee, id_trajet, id_etape, "arrivee", &h);
                         }
                     }
                 }
             }
         }
         printf("Tri en cours...\n");
+        h = 0;
+        AVL* nouvelAVL = NULL;
         //Copie de l'AVL et nouveau trie
-        AVL* nouvelAVL = copier_trier_t(a, NULL);
+        copier_trier_t(a, &nouvelAVL, &h);
         //Stockage des données nécessaires dans le fichier de sortie
         tri_alphabetique(nouvelAVL,argv[3],fichierSortie);
         //Libération de la mémoire de l'AVL
@@ -75,6 +78,7 @@ int main(int argc, char *argv[]){
         char ligne[7000000];
         AVL* a=NULL;
         int compteur=0;
+        int h = 0;
         printf("Récupération des données du fichier d'entrée en cours...\n");
         //Parcours du fichier d'entrée
         while(fgets(ligne,sizeof(ligne),fichierEntree)!=NULL){
@@ -107,7 +111,7 @@ int main(int argc, char *argv[]){
                                 if(sscanf(token, "%f", &distance) != 1){
                                     continue;
                                 }
-                                a = ajouterAVL_s(a, distance, id_trajet);
+                                a = ajouterAVL_s(a, distance, id_trajet, &h);
                             }
                         }
                     }
@@ -115,8 +119,10 @@ int main(int argc, char *argv[]){
             }
         }
         printf("Tri en cours...\n");
+        h = 0;
+        AVL* nouvelAVL = NULL;
         //Copie de l'AVL et nouveau trie
-        AVL* nouvelAVL = copier_trier_s(a, NULL);
+        copier_trier_s(a, &nouvelAVL, &h);
         //Stockage des données nécessaires dans le fichier de sortie
         stockageDonnees_s(nouvelAVL,argv[3],fichierSortie,&compteur);
         libererMemoire(a);
