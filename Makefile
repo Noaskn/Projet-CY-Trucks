@@ -1,13 +1,13 @@
-all : build script
+all: script
 
-clean :
+clean:
 	rm projet
 
-build :
+build:
 	gcc main.c fonctionsAVL.c fonctionsT.c fonctionsS.c -o projet
 
-run :
+run:
 	./projet
 
-script :
-	sh shell.sh data.csv
+script:
+	sh shell.sh data.csv $(ARG)
