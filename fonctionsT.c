@@ -24,26 +24,27 @@ AVL* creerAVL_t(int id_trajet, int id_etape, char ville[], char type[]){
         }
         else{
             //Gestion de l'erreur d'allocation mémoire
-            free(nouveau);
-            return NULL;
+            exit(1);
         }
         nouveau->fg = NULL;
         nouveau->fd = NULL;
-        nouveau->hauteur = 1;
+        nouveau->equilibre = 0;
     }
     return nouveau;
 }
 
 //Fonction pour ajouter une ville dans l'AVL
-AVL* ajouterAVL_t(AVL* a, char ville[],int id_trajet, int id_etape, char type[]){
+AVL* ajouterAVL_t(AVL* a, char ville[], int id_trajet, int id_etape, char type[], int* h){
     //AVL vide donc on crée directement le nœud
     if(a == NULL){
-        return creerAVL_t(id_trajet, id_etape, ville, type);
+        *h = 1;
+        a = creerAVL_t(id_trajet, id_etape, ville, type);
     }
     //Comparaison entre la ville de l'AVL et la ville passée en paramètre
     int compare=strcmp(ville, a->ville);
     //Si c'est la même ville
     if(compare == 0){
+        *h = 0;
         int i=0;
         //On regarde si l'identifiant est déjà présent
         while(a->tab_id[i] != 0){
@@ -78,33 +79,22 @@ AVL* ajouterAVL_t(AVL* a, char ville[],int id_trajet, int id_etape, char type[])
     }
     //Ajout de la ville dans le sous arbre de gauche
     else if(compare < 0){
-        a->fg = ajouterAVL_t(a->fg, ville, id_trajet, id_etape, type);
+        a->fg = ajouterAVL_t(a->fg, ville, id_trajet, id_etape, type, h);
+        *h = -*h;
     }
     //Ajout de la ville dans le sous arbre de droite
     else{
-        a->fd = ajouterAVL_t(a->fd, ville, id_trajet, id_etape, type);
-        
+        a->fd = ajouterAVL_t(a->fd, ville, id_trajet, id_etape, type, h);
     }
-    //Mise à jour de la hauteur et de l'équilibre
-    a->hauteur = 1 + maxi(hauteur(a->fg), hauteur(a->fd));
-    int eq = equilibre(a);
-    //Cas de l'équilibre à gauche-gauche
-    if(eq > 1 && strcmp(ville, a->fg->ville) < 0){
-        return rotationDroite(a);
-    }
-    //Cas de l'équilibre à droite-droite
-    if(eq < -1 && strcmp(ville, a->fd->ville) > 0){
-        return rotationGauche(a);
-    }
-    //Cas de l'équilibre à gauche-droite
-    if(eq > 1 && strcmp(ville, a->fg->ville) > 0){
-        a->fg = rotationGauche(a->fg);
-        return rotationDroite(a);
-    }
-    //Cas de l'équilibre à droite-gauche
-    if (eq < -1 && strcmp(ville, a->fd->ville) < 0) {
-        a->fd = rotationDroite(a->fd);
-        return rotationGauche(a);
+    if(*h != 0){
+        a->equilibre = a->equilibre + *h;
+        a=equilibrerAVL(a);
+        if(a->equilibre == 0){
+            *h = 0;
+        }
+        else{
+            *h = 1;
+        }
     }
     return a;
 }
@@ -121,70 +111,70 @@ AVL* creerAVLtrier_t(char ville[], int compteur_total, int compteur_depart){
         nouveau->compteur_depart = compteur_depart;
         nouveau->fg = NULL;
         nouveau->fd = NULL;
-        nouveau->hauteur = 1;
+        nouveau->equilibre = 0;
     }
     return nouveau;
 }
 
 //Fonction pour ajouter un nouveau compteur dans l'AVL
-AVL* ajouterAVLtrier_t(AVL* a, char ville[], int compteur_total, int compteur_depart){
+AVL* ajouterAVLtrier_t(AVL* a, char ville[], int compteur_total, int compteur_depart, int* h){
     //AVL vide donc on crée directement le nœud
     if(a == NULL){
-        return creerAVLtrier_t(ville,compteur_total,compteur_depart);
+        *h = 1;
+        a = creerAVLtrier_t(ville,compteur_total,compteur_depart);
     }
     //Ajout du compteur dans le sous arbre de gauche
     if(a->compteur_total>compteur_total){
-        a->fg = ajouterAVLtrier_t(a->fg,ville,compteur_total,compteur_depart);
+        a->fg = ajouterAVLtrier_t(a->fg,ville,compteur_total,compteur_depart,h);
+        *h = -*h;
     }
     //Ajout du compteur dans le sous arbre de droite
     else if(a->compteur_total<compteur_total){
-        a->fd = ajouterAVLtrier_t(a->fd,ville,compteur_total,compteur_depart);
+        a->fd = ajouterAVLtrier_t(a->fd,ville,compteur_total,compteur_depart,h);
     }
     //Le compteur existe déjà donc on trie par ville
     else{
         //Ajout du compteur dans le sous arbre de gauche
         if(strcmp(ville,a->ville)<0){
-            a->fg = ajouterAVLtrier_t(a->fg,ville,compteur_total,compteur_depart);
+            a->fg = ajouterAVLtrier_t(a->fg,ville,compteur_total,compteur_depart,h);
+            *h = -*h;
         }
         //Ajout du compteur dans le sous arbre de droite
         else if(strcmp(ville,a->ville)>0){
-            a->fd = ajouterAVLtrier_t(a->fd,ville,compteur_total,compteur_depart);
+            a->fd = ajouterAVLtrier_t(a->fd,ville,compteur_total,compteur_depart,h);
+        }
+        else{
+            *h = 0;
+            return a;
         }
     }
-    //Mise à jour de la hauteur et de l'équilibre
-    a->hauteur = 1 + maxi(hauteur(a->fg), hauteur(a->fd));
-    int eq = equilibre(a);
-    //Cas de l'équilibre à gauche-gauche
-    if(eq > 1 && compteur_total < a->fg->compteur_total){
-        return rotationDroite(a);
-    }
-    //Cas de l'équilibre à droite-droite
-    if(eq < -1 && compteur_total > a->fd->compteur_total){
-        return rotationGauche(a);
-    }
-    //Cas de l'équilibre à gauche-droite
-    if(eq > 1 && compteur_total > a->fg->compteur_total){
-        a->fg = rotationGauche(a->fg);
-        return rotationDroite(a);
-    }
-    //Cas de l'équilibre à droite-gauche
-    if(eq < -1 && compteur_total < a->fd->compteur_total){
-        a->fd = rotationDroite(a->fd);
-        return rotationGauche(a);
+    if(*h != 0){
+        a->equilibre = a->equilibre + *h;
+        a=equilibrerAVL(a);
+        if(a->equilibre == 0){
+            *h = 0;
+        }
+        else{
+            *h = 1;
+        }
     }
     return a;
 }
 
 //Fonction pour copier les données du premier AVL dans un second et faire un nouveau tri
-AVL* copier_trier_t(AVL* ancienAVL, AVL* nouveauAVL){
+AVL* copier_trier_t(AVL* ancienAVL, AVL** nouvelAVL, int* h){
     if(ancienAVL != NULL){
         //Copier les données dans le nouvel AVL
-        nouveauAVL = ajouterAVLtrier_t(nouveauAVL, ancienAVL->ville, ancienAVL->compteur_total, ancienAVL->compteur_depart);
+        *nouvelAVL = ajouterAVLtrier_t(*nouvelAVL, ancienAVL->ville, ancienAVL->compteur_total, ancienAVL->compteur_depart, h);
         //Appeler récursivement les sous-arbres
-        nouveauAVL = copier_trier_t(ancienAVL->fg, nouveauAVL);
-        nouveauAVL = copier_trier_t(ancienAVL->fd, nouveauAVL);
+        if(ancienAVL->fg != NULL){
+            copier_trier_t(ancienAVL->fg, nouvelAVL, h);
+        }
+        if(ancienAVL->fd != NULL){
+            copier_trier_t(ancienAVL->fd, nouvelAVL, h);
+        }
     }
-    return nouveauAVL;
+    return *nouvelAVL;
 }
 
 //Fonction pour comparer deux chaînes de caractères
