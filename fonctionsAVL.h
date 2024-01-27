@@ -22,14 +22,16 @@ typedef struct AVL{
     int compteur_distance;
     struct AVL* fg;
     struct AVL* fd;
-    int hauteur;
+    int equilibre;
 }AVL;
 
-int hauteur(AVL* a);
-int equilibre(AVL* a);
-int maxi(int a, int b);
-AVL* rotationGauche(AVL* y);
-AVL* rotationDroite(AVL* x);
+int maxi(int a,int b);
+int mini(int a,int b);
+AVL* rotationGauche(AVL* a);
+AVL* rotationDroite(AVL* a);
+AVL* doubleRotationGauche(AVL* a);
+AVL* doubleRotationDroite(AVL* a);
+AVL* equilibrerAVL(AVL* a);
 void libererMemoire(AVL* a);
 
 #endif
