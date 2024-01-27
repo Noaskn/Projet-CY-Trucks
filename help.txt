@@ -2,8 +2,8 @@ Bienvenue dans le Projet CY-Trucks de Emma Danan et Noa Sakoun
 
 Voici les étapes à suivre pour l'exécution :
 
-Tapez d'abord : "make" pour lancer le programme
-Ensuite, les traitements suivants seront disponibles :
+Tapez d'abord pour lancer le programme : make ARG="type de traitement"
+Voici les différents types de traitement que vous pouvez demander :
 	-d1 : 10 conducteurs avec le plus de trajets (tri par ordre décroissant)
 	-d2 : 10 conducteurs ayant parcouru la plus longue distance (tri par ordre décroissant)
 	-l : 10 numéros d'identifiant des trajets qui ont la plus longue distance (tri par ordre croissant)
