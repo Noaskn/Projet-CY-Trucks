@@ -83,6 +83,7 @@ AVL* ajouterAVL_s(AVL* a, float distance, int id_trajet, int* h){
     else{
         a->fd = ajouterAVL_s(a->fd,distance,id_trajet,h);
     }
+    //Equilibre de l'AVL
     if(*h != 0){
         a->equilibre = a->equilibre + *h;
         a=equilibrerAVL(a);
@@ -148,6 +149,7 @@ AVL* ajouterAVLtrier_s(AVL* a, float min, float max, float moy, int id_trajet, i
             return a;
         }
     }
+    //Equilibre de l'AVL
     if(*h != 0){
         a->equilibre = a->equilibre + *h;
         a=equilibrerAVL(a);
