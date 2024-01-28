@@ -86,6 +86,7 @@ AVL* ajouterAVL_t(AVL* a, char ville[], int id_trajet, int id_etape, char type[]
     else{
         a->fd = ajouterAVL_t(a->fd, ville, id_trajet, id_etape, type, h);
     }
+    //Equilibre de l'AVL
     if(*h != 0){
         a->equilibre = a->equilibre + *h;
         a=equilibrerAVL(a);
@@ -148,6 +149,7 @@ AVL* ajouterAVLtrier_t(AVL* a, char ville[], int compteur_total, int compteur_de
             return a;
         }
     }
+    //Equilibre de l'AVL
     if(*h != 0){
         a->equilibre = a->equilibre + *h;
         a=equilibrerAVL(a);
