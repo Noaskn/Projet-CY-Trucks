@@ -1,5 +1,6 @@
 #include "fonctionsAVL.h"
 
+//Fonction qui donne le maximum entre deux entiers
 int maxi(int a,int b){
     if(a>b){
         return a;
@@ -9,6 +10,7 @@ int maxi(int a,int b){
     }
 }
 
+//Fonction qui donne le minimum entre deux entiers
 int mini(int a,int b){
     if(a>b){
         return b;
@@ -18,6 +20,7 @@ int mini(int a,int b){
     }
 }
 
+//Fonction qui fait une rotation vers la gauche
 AVL* rotationGauche(AVL* a){
     if(a==NULL){
         exit(1);
@@ -35,6 +38,7 @@ AVL* rotationGauche(AVL* a){
     return a;
 }
 
+//Fonction qui fait une rotation vers la droite
 AVL* rotationDroite(AVL* a){
     if(a==NULL){
         exit(1);
@@ -52,6 +56,7 @@ AVL* rotationDroite(AVL* a){
     return a;
 }
 
+//Fonction qui fait une double rotation vers la gauche
 AVL* doubleRotationGauche(AVL* a){
     if(a==NULL){
         exit(1);
@@ -60,6 +65,7 @@ AVL* doubleRotationGauche(AVL* a){
     return rotationGauche(a);
 }
 
+//Fonction qui fait une double rotation vers la droite
 AVL* doubleRotationDroite(AVL* a){
     if(a==NULL){
         exit(1);
@@ -68,6 +74,7 @@ AVL* doubleRotationDroite(AVL* a){
     return rotationDroite(a);
 }
 
+//Fonction qui equilibre l'AVL en fonction du facteur d'équilibre du noeud
 AVL* equilibrerAVL(AVL* a){
     if(a==NULL){
         exit(1);
