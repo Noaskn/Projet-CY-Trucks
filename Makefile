@@ -4,7 +4,7 @@ DOSSIER_C = progc
 
 # Fichiers
 FICHIER_DATA = $(DOSSIER_DATA)/data.csv
-FICHIER_PROJET = $(DOSSIER_C)/projet
+FICHIER_PROJET = projet
 
 all: script
 
