@@ -6,7 +6,7 @@ Tapez d'abord pour lancer le programme : make ARG="type de traitement"
 Voici les différents types de traitement que vous pouvez demander :
 	-d1 : 10 conducteurs avec le plus de trajets (tri par ordre décroissant)
 	-d2 : 10 conducteurs ayant parcouru la plus longue distance (tri par ordre décroissant)
-	-l : 10 numéros d'identifiant des trajets qui ont la plus longue distance (tri par ordre croissant)
+	-l : 10 numéros d'identifiant des trajets qui ont la plus longue distance (tri par ordre décroissant)
 	-t : 10 villes avec le plus de trajets (tri par ordre alphabétique)
-	-s: distances minimales, maximales et moyennes de chaque trajet (tri par ordre croissant des numéros d'identifiants des trajets)
+	-s : 50 numéros d'identifiant des trajets qui ont la plus grande différence de distance max-min (tri par ordre décroissant)
 	-h : affichage de l'aide
