@@ -5,27 +5,34 @@
 #include <stdlib.h>
 #include <string.h>
 
+//Fonction principale
 int main(int argc, char *argv[]){
+    
     //Vérification du nombre d'arguments
     if(argc!=4){
         fprintf(stderr, "Usage : %s %s %s %s\n", argv[0], argv[1], argv[2], argv[3]);
         return 1;
     }
+    
     //Ouverture du fichier d'entrée
     FILE *fichierEntree = fopen(argv[1], "r");
     if(fichierEntree == NULL){
         perror("Erreur lors de l'ouverture du fichier d'entrée");
         return 1;
     }
+    
+    //Création du fichier de sortie
     FILE* fichierSortie = NULL;
     //Ouverture du fichier de sortie
     fichierSortie = fopen(argv[3], "w");
+    
     //Traitement -t
     if(strcmp(argv[2], "-t") == 0){
         char ligne[7000000];
         AVL* a=NULL;
         int h = 0;
         printf("Récupération des données du fichier d'entrée en cours...\n");
+        
         //Parcours du fichier d'entrée
         while(fgets(ligne,sizeof(ligne),fichierEntree)!=NULL){
             char ville_depart[100];
@@ -33,7 +40,8 @@ int main(int argc, char *argv[]){
             int id_trajet;
             int id_etape;
             char *token = strtok(ligne, ";");
-            //Récupération des données nécessaires au traitement
+            
+            //Récupération des données nécessaires au traitement -t
             if(token != NULL){
                 if(sscanf(token, "%d", &id_trajet) != 1){
                     continue;
@@ -73,6 +81,7 @@ int main(int argc, char *argv[]){
         fclose(fichierEntree);
         fclose(fichierSortie);
     }
+    
     //Traitement -s
     if(strcmp(argv[2], "-s") == 0){
         char ligne[7000000];
@@ -80,6 +89,7 @@ int main(int argc, char *argv[]){
         int compteur=0;
         int h = 0;
         printf("Récupération des données du fichier d'entrée en cours...\n");
+        
         //Parcours du fichier d'entrée
         while(fgets(ligne,sizeof(ligne),fichierEntree)!=NULL){
             int id_trajet;
@@ -88,7 +98,8 @@ int main(int argc, char *argv[]){
             char ville_arrivee[100];
             float distance;
             char *token = strtok(ligne, ";");
-            //Récupération des données nécessaires au traitement
+            
+            //Récupération des données nécessaires au traitement -s
             if(token != NULL) {
                 if(sscanf(token, "%d", &id_trajet) != 1){
                     continue;
@@ -111,6 +122,7 @@ int main(int argc, char *argv[]){
                                 if(sscanf(token, "%f", &distance) != 1){
                                     continue;
                                 }
+                                //Ajout dans l'AVL
                                 a = ajouterAVL_s(a, distance, id_trajet, &h);
                             }
                         }
