@@ -1,5 +1,6 @@
 Bienvenue dans le Projet CY-Trucks de Emma Danan et Noa Sakoun
 
+
 Le principe de ce programme est d'analyser un fichier de données de transport routier. Pour cela, 5 traitements vous sont proposés :
 
 -d1 : 10 conducteurs avec le plus de trajets (tri par ordre décroissant)
@@ -11,6 +12,7 @@ Le principe de ce programme est d'analyser un fichier de données de transport r
 -t : 10 villes avec le plus de trajets (tri par ordre alphabétique)
 
 -s : 50 numéros d'identifiant des trajets qui ont la plus grande différence de distance max-min (tri par ordre décroissant)
+
 
 Utilisation du programme :
 
