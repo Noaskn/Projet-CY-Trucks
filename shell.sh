@@ -52,12 +52,13 @@ case $traitement in
 
 #Trie en shell pour le traitement -d1
 -d1)
+    echo "Execution du traitement -d1 en cours..."
     debut_temps=$(date +%s)
     awk -F';' '!seen[$6,$1]++ {print $6}' $fichier_csv | sort | uniq -c | sort -k1,1nr | head -n 10 | awk '{print $2" "$3";"$1}' > "$temp/traitement_d1.txt"
     fin_temps=$(date +%s)
     duree=$((fin_temps - debut_temps)) #Calcul de la durée du traitement
     echo "Temps d'exécution du traitement d1 : $duree secondes"
-    # Script Gnuplot pour générer le graphique du traitement -d1
+    #Script Gnuplot pour générer le graphique du traitement -d1
     gnuplot << GPLOT
     set terminal png
     set output "$images/traitement_d1.png"
@@ -68,9 +69,9 @@ case $traitement in
     set boxwidth 0.5 absolute
     SkyBlue = "#87CEEB"
     set xrange [0.5:*]
-    set yrange [0:250]  # Définir une plage appropriée pour l'axe y
+    set yrange [0:250]
     set y2range [0:250]
-    set y2tics 50    # L'incrément sur l'axe des y est de 50
+    set y2tics 50
     set xtics nomirror rotate by 90 font "Arial,7" offset 0,-5.5
     set y2tics nomirror rotate by 90 font "Arial,7" offset 0,-1
     set origin 0,-0.01
@@ -81,18 +82,20 @@ case $traitement in
     set datafile separator ";"
     plot "./temp/traitement_d1.txt" using 2:xticlabels(1) with boxes lc rgb SkyBlue notitle axes x1y2
 GPLOT
-    # Rotation de l'image avec convert
+    #Rotation de l'image avec convert
     convert "$images/traitement_d1.png" -rotate 90 "$images/traitement_d1_rotated.png"
+    echo "Le graphique du traitement -d1 a été créé."
     ;;
 
 #Trie en shell pour le traitement -d2
 -d2)
+    echo "Execution du traitement -d2 en cours..."
     debut_temps=$(date +%s)
     LC_NUMERIC="C" awk -F';' '{distances[$6]+=$5} END {for (i in distances) printf "%.6f;%s\n", distances[i], i}' $fichier_csv | sort -t';' -k1,1rn | head -n 10 | awk -F';' '{printf "%s;%s\n", $2, $1}' > "$temp/traitement_d2.txt"
     fin_temps=$(date +%s)
     duree=$((fin_temps - debut_temps)) #Calcul de la durée du traitement
     echo "Temps d'exécution du traitement d2 : $duree secondes"
-    # Script Gnuplot pour générer le graphique du traitement -d2
+    #Script Gnuplot pour générer le graphique du traitement -d2
     gnuplot << GPLOT
     set terminal png
     set output "$images/traitement_d2.png"
@@ -103,9 +106,9 @@ GPLOT
     set boxwidth 0.5 absolute
     SkyBlue = "#87CEEB"
     set xrange [0.5:*]
-    set yrange [0:160000]  # Définir une plage appropriée pour l'axe y
+    set yrange [0:160000]
     set y2range [0:160000]
-    set y2tics 20000    # L'incrément sur l'axe des y est de 20000
+    set y2tics 20000
     set xtics nomirror rotate by 90 font "Arial,7" offset 0,-5.5
     set y2tics nomirror rotate by 90 font "Arial,7" offset 0,-1
     set origin 0,-0.01
@@ -116,18 +119,20 @@ GPLOT
     set datafile separator ";"
     plot "./temp/traitement_d2.txt" using 2:xticlabels(1) with boxes lc rgb SkyBlue title "Distance" axes x1y2
 GPLOT
-    # Rotation de l'image avec convert
+    #Rotation de l'image avec convert
     convert "$images/traitement_d2.png" -rotate 90 "$images/traitement_d2_rotated.png"
+    echo "Le graphique du traitement -d2 a été créé."
     ;;
 
 #Trie en shell pour le traitement -l
 -l)
+    echo "Execution du traitement -l en cours..."
     debut_temps=$(date +%s)
     LC_NUMERIC="C" awk -F';' '{distances[$1] += $5} END {for (i in distances) printf "%.6f;%d\n", distances[i], i}' $fichier_csv | sort -t';' -k1,1nr | head -n 10 | awk -F';' '{print $2";"$1}' | sort -t';' -k1,1nr > "$temp/traitement_l.txt"
     fin_temps=$(date +%s)
     duree=$((fin_temps - debut_temps)) #Calcul de la durée du traitement
     echo "Temps d'exécution du traitement l : $duree secondes"
-    # Script Gnuplot pour générer le graphique du traitement -l
+    #Script Gnuplot pour générer le graphique du traitement -l
     gnuplot << GPLOT
     set terminal png
     set output "$images/traitement_l.png"
@@ -139,19 +144,21 @@ GPLOT
     set boxwidth 0.5
     SkyBlue = "#87CEEB"
     set datafile separator ";"
-    set yrange [0:*]  # La plage de l'axe des y commence à 0 et s'étend jusqu'à la valeur maximale
-    set ytics 500     # L'incrément sur l'axe des y est de 500
-    set xtics font "Arial,7"  # Taille de la police des marques sur l'axe x
-    set ytics font "Arial,7"  # Taille de la police des marques sur l'axe y
-    set key off       # Désactiver la légende
+    set yrange [0:*]
+    set ytics 500
+    set xtics font "Arial,7"
+    set ytics font "Arial,7"
+    set key off
     plot "./temp/traitement_l.txt" using 2:xtic(1) with boxes lc rgb SkyBlue title "Distance"
 GPLOT
+    echo "Le graphique du traitement -l a été créé."
     ;;
 
 #Trie en C pour traitement -t
 -t)
+    echo "Execution du traitement -t en cours..."
     ./projet "$fichier_csv" -t "$temp/traitement_t.txt"
-    # Script Gnuplot pour générer le graphique du traitement -t
+    #Script Gnuplot pour générer le graphique du traitement -t
     gnuplot << GPLOT
     set terminal png
     set output "$images/traitement_t.png"
@@ -167,16 +174,18 @@ GPLOT
     set yrange [0:*]
     set ytics font "Arial,7"
     set xtics font "Arial,7"
-    set xtics rotate by -45  # Incliner les étiquettes sur l'axe x de 45 degrés
-    set key font "Arial,8"  # Changer la taille de la légende
+    set xtics rotate by -45
+    set key font "Arial,8"
     plot "./temp/traitement_t.txt" using 2:xtic(1) lc rgb SkyBlue title "Total routes", '' using 3 lc rgb DarkBlue title "First Town"
 GPLOT
+    echo "Le graphique du traitement -t a été créé."
     ;;
     
 #Trie en C pour traitement -s
 -s)
+    echo "Execution du traitement -s en cours..."
     ./projet "$fichier_csv" -s "$temp/traitement_s.txt"
-    # Script Gnuplot pour générer le graphique du traitement -s
+    #Script Gnuplot pour générer le graphique du traitement -s
     gnuplot << GPLOT
     set terminal png
     set output "$images/traitement_s.png"
@@ -193,11 +202,12 @@ GPLOT
     set ytics font "Arial,7"
     set xtics font "Arial,6"
     set ytics 100
-    set xtics rotate by -45  # Incliner les étiquettes sur l'axe x de 45 degrés
-    set key font "Arial,8"  # Changer la taille de la légende
+    set xtics rotate by -45
+    set key font "Arial,8"
     plot "./temp/traitement_s.txt" using 0:3:4:xticlabels(2) with filledcurves fc rgb SkyBlue title "Distances Max/Min (Km)", \
          '' using 0:5:xticlabels(2) with lines linestyle 5 lc rgb DarkBlue title 'Distance average(Km)'
 GPLOT
+    echo "Le graphique du traitement -s a été créé."
     ;;
 
 #Par défaut
