@@ -35,22 +35,25 @@ AVL* creerAVL_t(int id_trajet, int id_etape, char ville[], char type[]){
 
 //Fonction pour ajouter une ville dans l'AVL
 AVL* ajouterAVL_t(AVL* a, char ville[], int id_trajet, int id_etape, char type[], int* h){
+    
     //AVL vide donc on crée directement le nœud
     if(a == NULL){
         *h = 1;
         a = creerAVL_t(id_trajet, id_etape, ville, type);
     }
+    
     //Comparaison entre la ville de l'AVL et la ville passée en paramètre
     int compare=strcmp(ville, a->ville);
     //Si c'est la même ville
     if(compare == 0){
         *h = 0;
         int i=0;
+        
         //On regarde si l'identifiant est déjà présent
         while(a->tab_id[i] != 0){
             //Ville et identifiant déjà présents
             if(id_trajet == a->tab_id[i]){
-                 //Si c'est la première étape d'un trajet on augmente le compteur
+                //Si c'est la première étape d'un trajet on augmente le compteur
                 if(strcmp(type,"depart") == 0 && id_etape == 1){
                     a->compteur_depart++;
                 }
@@ -58,6 +61,7 @@ AVL* ajouterAVL_t(AVL* a, char ville[], int id_trajet, int id_etape, char type[]
             }
             i++;
         }
+        
         //Ville déjà présente donc on met à jour le compteur total et le tableau comptenant les identifiants
         a->compteur_total++;
          //Si c'est la première étape d'un trajet on augmente le compteur
@@ -73,19 +77,21 @@ AVL* ajouterAVL_t(AVL* a, char ville[], int id_trajet, int id_etape, char type[]
         }
         else{
             //Gestion de l'erreur d'allocation mémoire
-            fprintf(stderr, "Erreur lors de la réallocation du tableau d'identifiants de trajets.\n");
-            exit(EXIT_FAILURE);
+            exit(1);
         }
     }
+    
     //Ajout de la ville dans le sous arbre de gauche
     else if(compare < 0){
         a->fg = ajouterAVL_t(a->fg, ville, id_trajet, id_etape, type, h);
         *h = -*h;
     }
+    
     //Ajout de la ville dans le sous arbre de droite
     else{
         a->fd = ajouterAVL_t(a->fd, ville, id_trajet, id_etape, type, h);
     }
+    
     //Equilibre de l'AVL
     if(*h != 0){
         a->equilibre = a->equilibre + *h;
@@ -119,36 +125,44 @@ AVL* creerAVLtrier_t(char ville[], int compteur_total, int compteur_depart){
 
 //Fonction pour ajouter un nouveau compteur dans l'AVL
 AVL* ajouterAVLtrier_t(AVL* a, char ville[], int compteur_total, int compteur_depart, int* h){
+    
     //AVL vide donc on crée directement le nœud
     if(a == NULL){
         *h = 1;
         a = creerAVLtrier_t(ville,compteur_total,compteur_depart);
     }
+    
     //Ajout du compteur dans le sous arbre de gauche
     if(a->compteur_total>compteur_total){
         a->fg = ajouterAVLtrier_t(a->fg,ville,compteur_total,compteur_depart,h);
         *h = -*h;
     }
+    
     //Ajout du compteur dans le sous arbre de droite
     else if(a->compteur_total<compteur_total){
         a->fd = ajouterAVLtrier_t(a->fd,ville,compteur_total,compteur_depart,h);
     }
+    
     //Le compteur existe déjà donc on trie par ville
     else{
+        
         //Ajout du compteur dans le sous arbre de gauche
         if(strcmp(ville,a->ville)<0){
             a->fg = ajouterAVLtrier_t(a->fg,ville,compteur_total,compteur_depart,h);
             *h = -*h;
         }
+        
         //Ajout du compteur dans le sous arbre de droite
         else if(strcmp(ville,a->ville)>0){
             a->fd = ajouterAVLtrier_t(a->fd,ville,compteur_total,compteur_depart,h);
         }
+        
         else{
             *h = 0;
             return a;
         }
     }
+    
     //Equilibre de l'AVL
     if(*h != 0){
         a->equilibre = a->equilibre + *h;
@@ -206,7 +220,7 @@ void tri_alphabetique(AVL* a, char* mode, FILE* fichierSortie){
         exit(1);
     }
     int compteur = 0;  // Initialiser le compteur
-    AVL* tab_id[10];  // tableau pour stocker les 10 villes
+    AVL* tab_id[10];  // Tableau pour stocker les 10 villes
     stockageDonnees_t(a, mode, fichierSortie, &compteur, tab_id);
     //Trier le tableau par ordre alphabétique
     qsort(tab_id, compteur, sizeof(AVL*), comparerVilles);
