@@ -19,3 +19,6 @@ run:
 
 script:
 	sh shell.sh $(FICHIER_DATA) $(ARG)
+
+help:
+	sh shell.sh $(FICHIER_DATA) -h
