@@ -45,11 +45,13 @@ float moyenne(AVL* a){
 
 //Fonction pour ajouter un identifiant de trajet dans l'AVL
 AVL* ajouterAVL_s(AVL* a, float distance, int id_trajet, int* h){
+    
     //AVL vide donc on crée directement le nœud
     if(a == NULL){
         *h = 1;
         a = creerAVL_s(id_trajet, distance);
     }
+    
     //L'identifiant de trajet a été trouvé dans l'AVL
     if(a->id_trajet == id_trajet){
         *h = 0;
@@ -70,19 +72,21 @@ AVL* ajouterAVL_s(AVL* a, float distance, int id_trajet, int* h){
         }
         else{
             //Gestion de l'erreur d'allocation mémoire
-            fprintf(stderr, "Erreur lors de la réallocation du tableau d'identifiants de trajets.\n");
-            exit(EXIT_FAILURE);
+            exit(1);
         }
     }
+    
     //Ajout de l'identifiant de trajet dans le sous arbre de gauche
     else if(id_trajet<a->id_trajet){
         a->fg = ajouterAVL_s(a->fg,distance,id_trajet,h);
         *h = -*h;
     }
+    
     //Ajout de l'identifiant de trajet dans le sous arbre de droite
     else{
         a->fd = ajouterAVL_s(a->fd,distance,id_trajet,h);
     }
+    
     //Equilibre de l'AVL
     if(*h != 0){
         a->equilibre = a->equilibre + *h;
@@ -119,36 +123,44 @@ AVL* creerAVLtrier_s(float min, float max, float moy, int id_trajet){
 //Fonction pour ajouter une nouvelle différence de distance dans l'AVL
 AVL* ajouterAVLtrier_s(AVL* a, float min, float max, float moy, int id_trajet, int* h){
     float diff=max-min;
+    
     //AVL vide donc on crée directement le nœud
     if(a == NULL){
         *h = 1;
         a = creerAVLtrier_s(min,max,moy,id_trajet);
     }
+    
     //Ajout de la différence dans le sous arbre de gauche
     if(a->diff>diff){
         a->fg = ajouterAVLtrier_s(a->fg,min,max,moy,id_trajet,h);
         *h = -*h;
     }
+    
     //Ajout de la différence dans le sous arbre de droite
     else if(a->diff<diff){
         a->fd = ajouterAVLtrier_s(a->fd,min,max,moy,id_trajet,h);
     }
+    
     //La différence existe déjà donc on trie par identifiant de trajet
     else{
+        
         //Ajout de la différence dans le sous arbre de gauche
         if(a->id_trajet>id_trajet){
             a->fg = ajouterAVLtrier_s(a->fg,min,max,moy,id_trajet,h);
             *h = -*h;
         }
+        
         //Ajout de la différence dans le sous arbre de droite
         else if(a->id_trajet<id_trajet){
             a->fd = ajouterAVLtrier_s(a->fd,min,max,moy,id_trajet,h);
         }
+        
         else{
             *h = 0;
             return a;
         }
     }
+    
     //Equilibre de l'AVL
     if(*h != 0){
         a->equilibre = a->equilibre + *h;
