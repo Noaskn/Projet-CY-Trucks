@@ -11,7 +11,7 @@ AVL* creerAVL_t(int id_trajet, int id_etape, char ville[], char type[]){
         nouveau->id_trajet = id_trajet;
         nouveau->id_etape = id_etape;
         strcpy(nouveau->ville, ville);
-        nouveau->compteur_total = 0;
+        nouveau->compteur_total = 1;
         nouveau->compteur_depart = 0;
         //Si c'est la première étape d'un trajet on augmente le compteur
         if(strcmp(type,"depart")==0 && id_etape==1){
