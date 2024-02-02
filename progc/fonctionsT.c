@@ -11,7 +11,7 @@ AVL* creerAVL_t(int id_trajet, int id_etape, char ville[], char type[]){
         nouveau->id_trajet = id_trajet;
         nouveau->id_etape = id_etape;
         strcpy(nouveau->ville, ville);
-        nouveau->compteur_total = 0;
+        nouveau->compteur_total = 1;
         nouveau->compteur_depart = 0;
         //Si c'est la première étape d'un trajet on augmente le compteur
         if(strcmp(type,"depart")==0 && id_etape==1){
@@ -49,6 +49,7 @@ AVL* ajouterAVL_t(AVL* a, char ville[], int id_trajet, int id_etape, char type[]
         *h = 0;
         int i=0;
         
+        //Ville déjà présente donc on met à jour le compteur total et le tableau comptenant les identifiants
         //On regarde si l'identifiant est déjà présent
         while(a->tab_id[i] != 0){
             //Ville et identifiant déjà présents
@@ -61,19 +62,17 @@ AVL* ajouterAVL_t(AVL* a, char ville[], int id_trajet, int id_etape, char type[]
             }
             i++;
         }
-        
-        //Ville déjà présente donc on met à jour le compteur total et le tableau comptenant les identifiants
-        a->compteur_total++;
-         //Si c'est la première étape d'un trajet on augmente le compteur
+        //Si c'est la première étape d'un trajet on augmente le compteur
         if(strcmp(type,"depart") == 0 && id_etape == 1){
             a->compteur_depart++;
         }
         //Réallocation du tableau avec une taille augmentée
-        int* temp = (int*)realloc(a->tab_id, a->compteur_total * sizeof(int));
+        int* temp = (int*)realloc(a->tab_id, (a->compteur_total+1) * sizeof(int));
         if(temp != NULL){
             //Ajout de l'identifiant de trajet dans le tableau
             a->tab_id = temp;
-            a->tab_id[a->compteur_total - 1] = id_trajet;
+            a->tab_id[a->compteur_total-1] = id_trajet;
+            a->compteur_total++;
         }
         else{
             //Gestion de l'erreur d'allocation mémoire
