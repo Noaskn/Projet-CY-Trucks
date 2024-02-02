@@ -49,7 +49,6 @@ AVL* ajouterAVL_t(AVL* a, char ville[], int id_trajet, int id_etape, char type[]
         *h = 0;
         int i=0;
         
-        //Ville déjà présente donc on met à jour le compteur total et le tableau comptenant les identifiants
         //On regarde si l'identifiant est déjà présent
         while(a->tab_id[i] != 0){
             //Ville et identifiant déjà présents
@@ -66,6 +65,7 @@ AVL* ajouterAVL_t(AVL* a, char ville[], int id_trajet, int id_etape, char type[]
         if(strcmp(type,"depart") == 0 && id_etape == 1){
             a->compteur_depart++;
         }
+        //Ville déjà présente donc on met à jour le compteur total et le tableau comptenant les identifiants
         //Réallocation du tableau avec une taille augmentée
         int* temp = (int*)realloc(a->tab_id, (a->compteur_total+1) * sizeof(int));
         if(temp != NULL){
